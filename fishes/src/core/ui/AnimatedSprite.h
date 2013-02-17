@@ -19,13 +19,14 @@
 
 namespace ui {
 
-class AnimatedSprite
+class AnimatedSprite : public sf::Sprite
 {
     // internal flags
     enum Flag {
         NONE =          0,
         STOPPED =       (1 << 0),
         LOOP =          (1 << 1),
+        PLAYING =       (1 << 2),
     };
 public:
     struct AnimIndices {
@@ -37,12 +38,8 @@ public:
     AnimatedSprite();
     ~AnimatedSprite();
 
-    // Returns the sprite that uses
-    inline const sf::Sprite &sprite(void) const;
-    inline sf::Sprite &sprite(void);
-
-    // Construct the animated sprite from file (texture) and set the size of
-    // the animation (in width and height). The sprite number will be ordered
+    // @brief Construct the animated sprite from file (texture) and set the size
+    // of the animation (in width and height). The sprite number will be ordered
     // like this:
     // 0    1   2   3
     // 4    5   6   7
@@ -55,53 +52,65 @@ public:
                std::size_t numColumns = 1,
                std::size_t numRows = 1);
 
-    // Create animation table. This animation table is used associate sprite
-    // ranges to a given animation name (ID = size_t).
+    // @brief Create animation table. This animation table is used associate
+    // sprite ranges to a given animation name (ID = size_t).
+    // The frames will be:
+    // 0    1   2   3
+    // 4    5   6   7
+    // 8    9   10  11...
     // @param   animations  The vector of ranges, where animations[i] is the i-th
     //                      animation (i its the anim ID).
     // @returns true on success or false on error.
     bool createAnimTable(const std::vector<AnimIndices> &animations);
 
-    // Configure the animation to be played
+    // @brief Configure the animation to be played
     // @param   animID      The animation ID.
     // @param   time        If we want to change the time of the animation,
     //                      if time = -1 then we will use the time set when
     //                      create the anim table
-    void setAnim(const std::size_t animID, const float time = -1);
+    void setAnim(const std::size_t animID, const float time = -1.f);
 
-    // Play / stop functions
+    // @brief Play / stop functions
     inline void play(void);
     inline void stop(void);
+
+    // @brief Check if the animation is stopped or not
+    // @returns true if the animation is stopped, false otherwise
     inline bool isStopped(void) const;
 
-    // Set/unset loop animation
+    // @brief Set/unset loop animation
+    // @param loop  Set the animations to loop or not
     inline void setLoop(bool loop);
 
-    // This function must be called every frame to update the animation logic
+    // @brief This function must be called every frame to update the animation logic
+    // It will also draw the sprite into the associated window
+    // @param timeFrame     The last time frame.
     void update(float timeFrame);
 
+
 private:
-    // Flags manipulation functions
+    // @brief Flags manipulation functions
     inline void setFlag(Flag f);
     inline void unsetFlag(Flag f);
     inline bool checkFlag(Flag f) const;
     inline void clearFlags(void);
 
-    // Check if the animation table is valid
+    // @brief Check if the animation table is valid
     bool checkAnimTable(const std::vector<AnimIndices> &animation) const;
 
-    // Configure the rectangle for a given sprite index
+    // @brief Configure the rectangle for a given sprite index
     void configureRect(const std::size_t index);
 
 private:
     typedef std::vector<AnimIndices> AnimationVec;
 
 
-    sf::Sprite mSprite;
     boost::shared_ptr<sf::Texture> mTexture;
     int mFlags;
     float mAccumTime;
     float mAnimTime;
+    float mTimeFactor;
+    std::size_t mFrameIndex;
     sf::IntRect mRect;
     std::size_t mNumRows;
     std::size_t mNumColumns;
@@ -135,21 +144,11 @@ AnimatedSprite::clearFlags(void)
 }
 
 
-inline const sf::Sprite &
-AnimatedSprite::sprite(void) const
-{
-    return mSprite;
-}
-inline sf::Sprite &
-AnimatedSprite::sprite(void)
-{
-    return mSprite;
-}
-
 inline void
 AnimatedSprite::play(void)
 {
     unsetFlag(Flag::STOPPED);
+    setFlag(Flag::PLAYING);
 }
 inline void
 AnimatedSprite::stop(void)

@@ -4,8 +4,6 @@
 IF(NOT DEV_ROOT_PATH)
 	message(SEND_ERROR "No esta seteado DEV_ROOT_PATH")
 endif()
-include(${DEV_ROOT_PATH}/DevPaths.cmake)
-
 SET(CP DEV_ROOTH_PATH/actualPath)
 
 set(HDRS
@@ -47,7 +45,7 @@ include_directories(${ACTUAL_DIRS})
 
 #define	DEV_ROOT_PATH_STR		"DEV_ROOT_PATH"
 
-#define DEV_PATH_ENV_NAME		"ESTRATEGIA2012_DEV_PATH"
+#define DEV_PATH_ENV_NAME		"SURY_FISHES_DEV_PATH"
 
 
 		// TODO: aca ponemos los folders que queremos evitar
@@ -153,8 +151,7 @@ static void constructOutput(std::string &out,
 
 	out = "IF(NOT DEV_ROOT_PATH)\n"
 			"\tmessage(SEND_ERROR \"No esta seteado DEV_ROOT_PATH\")\n"
-			"endif()\n"
-			"include(${DEV_ROOT_PATH}/DevPaths.cmake)\n\n";
+			"endif()\n\n";
 
 	out.append("set(CP " + actualPath + ")\n\n");
 	out += "set(SRCS\n";

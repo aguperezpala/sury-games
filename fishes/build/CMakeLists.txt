@@ -37,10 +37,13 @@ include_directories(
 	
 	# common
 	${DEV_ROOT_PATH}/common
+	
+	# core
+	${DEV_ROOT_PATH}/core
 )
 
 # include all the AutoGen.cmake
-
+include(${DEV_ROOT_PATH}/core/ui/AutoGen.cmake)
 
 # Set all the libraries here
 # Set the default flags to the build
