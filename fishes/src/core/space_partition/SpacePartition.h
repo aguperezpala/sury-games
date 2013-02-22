@@ -8,14 +8,59 @@
 #ifndef SPACEPARTITION_H_
 #define SPACEPARTITION_H_
 
+#include <vector>
+#include <limits>
+
 #include <math/AABB.h>
 #include <math/Vector2.h>
+#include <debug/DebugUtil.h>
 
 #include "Defines.h"
+#include "TwoDimCell.h"
+#include "Object.h"
 
 namespace s_p {
 
+
 class SpacePartition {
+
+    typedef std::vector<TwoDimCell> CellsVec;
+
+    // Matrix definition
+    class Matrix {
+    public:
+        Matrix();
+        ~Matrix();
+
+        // Create a matrix, if the matrix is already created it will be destroyed
+        //
+        void create(const size_t numRows, const size_t numCols);
+
+        // destroy the actual matrix
+        //
+        void destroy(void);
+
+        // Remove all the objects from the cells
+        //
+        void removeAllObjects(void);
+
+        // Get the TwoDimCell associated to a row and column.
+        //
+        inline TwoDimCell &getCell(const size_t col, const size_t row) const;
+        inline void getCell(const size_t bcol, const size_t brow,
+                            const size_t ecol, const size_t erow,
+                            std::vector<TwoDimCell*> &result) const;
+
+    private:
+        Matrix(const Matrix&);
+        Matrix &operator=(const Matrix&);
+
+    private:
+        CellsVec mCells;
+        size_t mRows;
+        size_t mCols;
+
+    };
 
 public:
     SpacePartition();
@@ -54,7 +99,7 @@ public:
      * @brief Add a object (the object wasn't added before)
      * @param obj   The object to be added
      */
-    void addObject(const Object *obj);
+    void addObject(Object *obj);
 
     /**
      * @brief Removes an object from the SpacePartition. This will stop the
@@ -68,6 +113,12 @@ public:
      * @brief Remove all the objects
      */
     void removeAllObjects(void);
+
+    /**
+     * @brief Check if an object exists or not in the SpacePartition
+     * @param obj   The object we want to check if exists or not
+     */
+    inline bool exists(const Object *obj) const;
 
 
     // Specific object handling functions
@@ -141,6 +192,23 @@ public:
      */
     inline bool isPointInside(const math::Vector2f &p);
 
+
+private:
+    // Auxiliary functions
+    //
+
+    /**
+     * Returns the corresponding values from a vector to the matrix
+     */
+    inline size_t getXPosition(const float x) const;
+    inline size_t getYPosition(const float y) const;
+
+    /**
+     * Get the cells associated to a Object and put the result in mCellAuxBuffer
+     */
+    inline void getCellsFromObject(const Object *obj) const;
+
+
 private:
     float mFactorX;
     float mFactorY;
@@ -150,12 +218,54 @@ private:
     float mYBounds;
     size_t mNumCellX;
     size_t mNumCellY;
+    Matrix mMatrix;
+    std::vector<TwoDimCell*> mCellAuxBuffer;
+    std::vector<Object *> mObjects;
 };
 
 
 
 // Inline Implementations
 //
+
+/**
+ * Returns the corresponding values from a vector to the matrix
+ */
+inline size_t
+SpacePartition::getXPosition(const float x) const
+{
+    ASSERT(x >= 0.f);
+    const size_t r = static_cast<size_t>(x * mFactorX);
+    ASSERT(r < mNumCellX);
+    return (r >= mNumCellX) ? mNumCellX - 1 : r;
+}
+inline size_t
+SpacePartition::getYPosition(const float y) const
+{
+    ASSERT(y >= 0.f);
+    const size_t r = static_cast<size_t>(y * mFactorY);
+    ASSERT(r < mNumCellY);
+    return (r >= mNumCellY) ? mNumCellY-1 : r;
+}
+
+inline void
+SpacePartition::getCellsFromObject(const Object *obj) const
+{
+    ASSERT(obj);
+    mCellAuxBuffer.clear();
+    const math::Vector2f &tl = obj->mAABB.tl;
+    const math::Vector2f &br = obj->mAABB.br;
+    mMatrix.getCell(getXPosition(tl.x), getYPosition(tl.y),
+                    getXPosition(br.x), getYPosition(br.y),
+                    mCellAuxBuffer);
+}
+
+inline bool
+SpacePartition::exists(const Object *obj) const
+{
+    ASSERT(obj);
+    return obj->mID < mObjects.size() && mObjects[obj->mID] == obj;
+}
 
 
 inline float
@@ -200,7 +310,36 @@ SpacePartition::isPointInside(const math::Vector2f &p)
     return true;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+inline TwoDimCell &
+SpacePartition::Matrix::getCell(const size_t col, const size_t row) const
+{
+    ASSERT(mRows != std::numeric_limits<size_t>::max());
+    ASSERT(mCols != std::numeric_limits<size_t>::max());
+    ASSERT(mCols * row + col < mCells.size());
+    return mCells[mCols * row + col]
+}
 
+inline void
+SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
+                                const size_t ecol, const size_t erow,
+                                std::vector<TwoDimCell*> &result) const
+{
+    ASSERT(mRows != std::numeric_limits<size_t>::max());
+    ASSERT(mCols != std::numeric_limits<size_t>::max());
+
+    size_t bIndex = mCols * brow + bcol;
+    const size_t eIndex = mCols * erow + ecol;
+
+    ASSERT(bIndex <= eIndex);
+    ASSERT(bIndex < mCells.size());
+    ASSERT(eIndex < mCells.size());
+
+    // we do not reserve the size for the vector becase we assume that we
+    // we will use always the same vector
+    for(; bIndex < eIndex; ++bIndex)
+        result.push_back(&mCells[bIndex]);
+}
 
 }
 

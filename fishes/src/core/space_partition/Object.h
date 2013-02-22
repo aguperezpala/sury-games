@@ -19,10 +19,11 @@ namespace s_p {
 // Forward declarations
 //
 class TwoDimCell;
+class SpacePartition;
 
 class Object {
 public:
-    static const unsigned int INVALID_INDEX = UINT_MAX;
+    static const uint32_t INVALID_INDEX = UINT_MAX;
 public:
     Object() :
         mGroupMask(~0u)
@@ -56,6 +57,7 @@ public:
 private:
     // All this functions will be used by the Cell classes only
     friend class TwoDimCell;
+    friend class SpacePartition;
 
     /**
      * @brief Position handling and query functions
@@ -71,7 +73,7 @@ private:
     math::AABBf  mAABB;
     // user defined type
     void *mUserDefined;
-    // the id of the object (index in manager) TODO: we are really using this?
+    // the id of the object (index in manager)
     uint32_t mID;
 };
 
