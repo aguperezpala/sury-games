@@ -29,6 +29,7 @@ public:
         mGroupMask(~0u)
     ,   mUserDefined(0)
     ,   mID(INVALID_INDEX)
+    ,   mCheckRun(0)
     {}
 
     /**
@@ -75,6 +76,8 @@ private:
     void *mUserDefined;
     // the id of the object (index in manager)
     uint32_t mID;
+    // value used to determine if the object was already checked in a run
+    mutable unsigned short mCheckRun;
 };
 
 
@@ -90,7 +93,7 @@ Object::setPosition(const math::Vector2f &pos)
 inline const math::Vector2f &
 Object::position(void) const
 {
-    mAABB.pos;
+    return mAABB.pos;
 }
 
 template <typename _T>

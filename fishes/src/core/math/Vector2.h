@@ -27,6 +27,7 @@ public:
     _T x;
     _T y;
 public:
+    Vector2(){};
     Vector2(_T aX, _T aY) : x(aX), y(aY) {};
     Vector2(const Vector2 &o) : x(o.x), y(o.y) {};
 

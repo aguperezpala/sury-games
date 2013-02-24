@@ -46,10 +46,15 @@ class SpacePartition {
 
         // Get the TwoDimCell associated to a row and column.
         //
-        inline TwoDimCell &getCell(const size_t col, const size_t row) const;
+        inline TwoDimCell &getCell(const size_t col, const size_t row);
+        inline TwoDimCell &getCell(const size_t index);
         inline void getCell(const size_t bcol, const size_t brow,
                             const size_t ecol, const size_t erow,
-                            std::vector<TwoDimCell*> &result) const;
+                            std::vector<TwoDimCell*> &result);
+
+        // helper function to get the index from a column and row number
+        //
+        inline size_t getIndex(const size_t col, const size_t row) const;
 
     private:
         Matrix(const Matrix&);
@@ -130,7 +135,7 @@ public:
      *              Partition)
      * @param t     The translation vector
      */
-    void translateObject(Object *obj, const math::Vector2f &t);
+    inline void translateObject(Object *obj, const math::Vector2f &t);
 
     /**
      * @brief Set the position of an specific object using a math::vector2
@@ -204,9 +209,12 @@ private:
     inline size_t getYPosition(const float y) const;
 
     /**
-     * Get the cells associated to a Object and put the result in mCellAuxBuffer
+     * Get the cells associated to a Object and put the result in buff
      */
-    inline void getCellsFromObject(const Object *obj) const;
+    inline void getCellsFromObject(const Object *obj,
+                                   std::vector<TwoDimCell*> &buff);
+    inline void getCellsFromAABB(const math::AABBf &aabb,
+                                 std::vector<TwoDimCell*> &buff);
 
 
 private:
@@ -221,6 +229,7 @@ private:
     Matrix mMatrix;
     std::vector<TwoDimCell*> mCellAuxBuffer;
     std::vector<Object *> mObjects;
+    unsigned short mRunNumber;
 };
 
 
@@ -249,15 +258,25 @@ SpacePartition::getYPosition(const float y) const
 }
 
 inline void
-SpacePartition::getCellsFromObject(const Object *obj) const
+SpacePartition::getCellsFromObject(const Object *obj,
+                                   std::vector<TwoDimCell*> &buff)
 {
     ASSERT(obj);
-    mCellAuxBuffer.clear();
+    buff.clear();
     const math::Vector2f &tl = obj->mAABB.tl;
     const math::Vector2f &br = obj->mAABB.br;
     mMatrix.getCell(getXPosition(tl.x), getYPosition(tl.y),
                     getXPosition(br.x), getYPosition(br.y),
-                    mCellAuxBuffer);
+                    buff);
+}
+inline void
+SpacePartition::getCellsFromAABB(const math::AABBf &aabb,
+                                 std::vector<TwoDimCell*> &buff)
+{
+    buff.clear();
+    mMatrix.getCell(getXPosition(aabb.tl.x), getYPosition(aabb.tl.y),
+                    getXPosition(aabb.br.x), getYPosition(aabb.br.y),
+                    buff);
 }
 
 inline bool
@@ -298,6 +317,11 @@ SpacePartition::numCellsy(void) const
 {
     return mNumCellY;
 }
+inline void
+SpacePartition::translateObject(Object *obj, const math::Vector2f &t)
+{
+    setObjectPosition(obj, obj->position() + t);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 inline bool
@@ -312,18 +336,24 @@ SpacePartition::isPointInside(const math::Vector2f &p)
 
 ////////////////////////////////////////////////////////////////////////////////
 inline TwoDimCell &
-SpacePartition::Matrix::getCell(const size_t col, const size_t row) const
+SpacePartition::Matrix::getCell(const size_t col, const size_t row)
 {
     ASSERT(mRows != std::numeric_limits<size_t>::max());
     ASSERT(mCols != std::numeric_limits<size_t>::max());
     ASSERT(mCols * row + col < mCells.size());
-    return mCells[mCols * row + col]
+    return mCells[mCols * row + col];
+}
+inline TwoDimCell &
+SpacePartition::Matrix::getCell(const size_t index)
+{
+    ASSERT(index < mCells.size());
+    return mCells[index];
 }
 
 inline void
 SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
                                 const size_t ecol, const size_t erow,
-                                std::vector<TwoDimCell*> &result) const
+                                std::vector<TwoDimCell*> &result)
 {
     ASSERT(mRows != std::numeric_limits<size_t>::max());
     ASSERT(mCols != std::numeric_limits<size_t>::max());
@@ -341,7 +371,13 @@ SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
         result.push_back(&mCells[bIndex]);
 }
 
+inline size_t
+SpacePartition::Matrix::getIndex(const size_t col, const size_t row) const
+{
+    return mCols * row + col;
+}
+
 }
 
 #endif /* SPACEPARTITION_H_ */
-/
+

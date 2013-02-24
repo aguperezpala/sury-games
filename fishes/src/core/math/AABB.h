@@ -21,6 +21,7 @@ public:
     Vector2<_T> br;
     Vector2<_T> pos;
 
+    AABB(){};
     AABB(const Vector2<_T> &topLeft, const Vector2<_T> &bottomRight)
     {
         tl = topLeft;

@@ -7,6 +7,19 @@
 
 #include "SpacePartition.h"
 
+#include <algorithm>
+
+
+// Auxiliary functions
+//
+namespace {
+static inline bool
+segmentIntersection(const size_t a, const size_t b,
+                    const size_t c, const size_t d)
+{
+    return (b <= d && b >= c) || (a >= c && a <= d) || (a <= c && b >= d);
+}
+}
 
 namespace s_p {
 
@@ -66,6 +79,7 @@ SpacePartition::SpacePartition() :
 ,       mYBounds(0)
 ,       mNumCellX(0)
 ,       mNumCellY(0)
+,       mRunNumber(0)
 {
 
 }
@@ -93,6 +107,8 @@ SpacePartition::build(const float ssX, const float ssY,
     // create the factors
     mFactorX = static_cast<float>(cnX) / ssX;
     mFactorY = static_cast<float>(cnY) / ssY;
+
+    return true;
 }
 
 // Space Partition object handling functions
@@ -110,9 +126,9 @@ SpacePartition::addObject(Object *obj)
     }
 
     // now we have to add to the respectives cells
-    getCellsFromObject(obj);
+    getCellsFromObject(obj, mCellAuxBuffer);
     for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
-        mCellAuxBuffer[i]->addObject(obj);
+        (mCellAuxBuffer)[i]->addObject(obj);
     }
 }
 
@@ -131,9 +147,9 @@ SpacePartition::removeObject(const Object *obj)
     mObjects.pop_back();
 
     // else we have to remove the object from the cells where it is
-    getCellsFromObject(obj);
+    getCellsFromObject(obj, mCellAuxBuffer);
     for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
-        mCellAuxBuffer[i]->removeObject(obj);
+        (mCellAuxBuffer)[i]->removeObject(obj);
     }
 }
 
@@ -152,21 +168,51 @@ SpacePartition::removeAllObjects(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::translateObject(Object *obj, const math::Vector2f &t)
-{
-    ASSERT(obj);
-    // TODO: use a sort intersection algorithm to get the new cells
-    // and let the old ones just like they are.
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void
 SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
 {
     ASSERT(obj);
-    // TODO: use a sort intersection algorithm to get the new cells
-    // and let the old ones just like they are.
+    // First get the actual indices for the object
+    const math::Vector2f &tl = obj->mAABB.tl;
+    const math::Vector2f &br = obj->mAABB.br;
+    size_t beforeBIndex = mMatrix.getIndex(tl.x, tl.y);
+    const size_t beforeEIndex = mMatrix.getIndex(br.x, br.y);
+
+    obj->setPosition(pos);
+
+    // get the new positions now
+    size_t afterBIndex = mMatrix.getIndex(tl.x, tl.y);
+    const size_t afterEIndex = mMatrix.getIndex(br.x, br.y);
+
+    // calculate the intersection
+    if (!segmentIntersection(beforeBIndex, beforeEIndex,
+            afterBIndex, afterEIndex)){
+        // they not intersect, remove the object in the old cells and then
+        // add it to the new one
+        for(; beforeBIndex < beforeEIndex; ++beforeBIndex){
+            mMatrix.getCell(beforeBIndex).removeObject(obj);
+        }
+        for(; afterBIndex < afterEIndex; ++afterBIndex){
+            mMatrix.getCell(afterBIndex).addObject(obj);
+        }
+        return;
+    }
+
+    // they intersect, we need to get the indices for the new cells only
+    // and remove the old ones
+    for(size_t i = beforeBIndex; i < afterBIndex; ++i){
+        mMatrix.getCell(i).removeObject(obj);
+    }
+    for(size_t i = beforeEIndex; i < afterEIndex; ++i){
+        mMatrix.getCell(i).removeObject(obj);
+    }
+
+    // add
+    for(size_t i = afterBIndex; i < beforeBIndex; ++i){
+        mMatrix.getCell(i).addObject(obj);
+    }
+    for(size_t i = afterEIndex; i < beforeEIndex; ++i){
+        mMatrix.getCell(i).addObject(obj);
+    }
 }
 
 
@@ -179,6 +225,14 @@ void
 SpacePartition::getIntersections(const Object *obj, ConstObjectVec &objs)
 {
     ASSERT(obj);
+    // new run number
+    ++mRunNumber;
+    objs.clear();
+
+    getCellsFromObject(obj, mCellAuxBuffer);
+    for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
+        mCellAuxBuffer[i]->getCollisions(obj, objs, mRunNumber);
+    }
 }
 
 
@@ -188,7 +242,14 @@ SpacePartition::getObjectsQuery(const math::AABBf &aabb,
                                 uint32_t mask,
                                 ConstObjectVec &result)
 {
+    // new run number
+    ++mRunNumber;
+    result.clear();
 
+    getCellsFromAABB(aabb, mCellAuxBuffer);
+    for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
+        mCellAuxBuffer[i]->getCollisionQuery(aabb, result, mRunNumber, mask);
+    }
 }
 
 
@@ -198,7 +259,13 @@ SpacePartition::getObjectsQuery(const math::Vector2f &point,
                                 ConstObjectVec &result,
                                 uint32_t mask)
 {
+    // new run number
+    ++mRunNumber;
+    result.clear();
 
+    TwoDimCell &cell = mMatrix.getCell(getXPosition(point.x),
+                                       getYPosition(point.y));
+    cell.getCollisionQuery(point, result, mRunNumber, mask);
 }
 
 
@@ -209,7 +276,9 @@ SpacePartition::getObjectsQuery(const math::Vector2f &p1,
                                 ConstObjectVec &result,
                                 uint32_t mask)
 {
-
+    ASSERT(false);
+    // TODO: here we have to get first the cells that collide with the line
+    // and then iterate over all checking for the objects
 }
 
 

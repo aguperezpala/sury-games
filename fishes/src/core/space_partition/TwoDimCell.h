@@ -33,9 +33,11 @@ namespace s_p {
 //  |------------------------->
 // (0,0)                      (N,0)
 
-template<typename _T = float>
 class TwoDimCell {
 public:
+    TwoDimCell(){}
+    ~TwoDimCell(){}
+
     /**
      * @brief Add a new object to the cell. The object should be in the space
      *        of this cell.
@@ -54,9 +56,13 @@ public:
      * @brief Get the objects that "collide" for a specific one (use the groupMask)
      * @param obj       The object to be checked against
      * @param result    The list of objects that collide against the obj
+     * @param runNum    The run number (this will be used to check if some
+     *                  Object was already checked or not, if the object
+     *                  was already checked then we skip it.
      */
     inline void getCollisions(const Object *obj,
-                              std::vector<const Object *> &result) const;
+                              std::vector<const Object *> &result,
+                              unsigned short runNum) const;
 
     // Query
     //
@@ -65,34 +71,40 @@ public:
      * @brief Get the objects that collide against an AABB and using a mask
      * @param AABB      The AABB to be used
      * @param result    The vector where the results will be put
+     * @param runNum    The run number (this will be used to check if some
+     *                  Object was already checked or not, if the object
+     *                  was already checked then we skip it.
      * @param mask      The mask to be used if we want to use one
      */
+    template<typename _T>
     inline void getCollisionQuery(const math::AABB<_T> &AABB,
                                   std::vector<const Object *> &result,
+                                  unsigned short runNum,
                                   const uint32_t mask = ~0) const;
 
     /**
      * @brief Get the objects that intersect a point and using a mask
      * @param point     The point to be used
      * @param result    The vector where the results will be put
+     * @param runNum    The run number (this will be used to check if some
+     *                  Object was already checked or not, if the object
+     *                  was already checked then we skip it.
      * @param mask      The mask to be used if we want to use one
      */
-    inline void getCollisionQuery(const math::Vector2<_T> &AABB,
+    template<typename _T>
+    inline void getCollisionQuery(const math::Vector2<_T> &point,
                                   std::vector<const Object *> &result,
+                                  unsigned short runNum,
                                   const uint32_t mask = ~0) const;
 
 private:
-    // Avoid cell copying
-    TwoDimCell(const TwoDimCell &other);
-    TwoDimCell &operator=(const TwoDimCell &other);
-
     // Auxiliary function to remove an object from the vector (and do a swap)
     //
     inline void swapAndRemove(const Object *obj);
     inline void swapAndRemove(const size_t index);
 
 private:
-    ObjectVec mObjects;
+    ConstObjectVec mObjects;
 };
 
 // Inline implementations
@@ -150,52 +162,62 @@ TwoDimCell::removeAll(void)
 
 inline void
 TwoDimCell::getCollisions(const Object *obj,
-                          std::vector<const Object *> &result) const
+                          std::vector<const Object *> &result,
+                          unsigned short runNum) const
 {
     // TODO: probably we can improve this using other data structure instead
     // of an vector (taking into account add / remove / find object velocity
 
     // get the dynamic ones
     for(size_t i = 0, size = mObjects.size(); i < size; ++i){
-        const Object *&aux = mObjects[i];
-        if((obj != aux) && (obj->mGroupMask & aux->mGroupMask)
-            && (obj->mAABB.collide(aux->mAABB))){
+        const Object *aux = mObjects[i];
+        if((obj != aux) &&
+                (obj->mGroupMask & aux->mGroupMask) &&
+                (obj->mCheckRun != runNum) &&
+                (obj->mAABB.collide(aux->mAABB))){
             // check for furder collision here... or not?
-            mObjects.push_back(aux);
+            aux->mCheckRun = runNum;
+            result.push_back(aux);
         }
     }
 }
 
-
+template<typename _T>
 inline void
 TwoDimCell::getCollisionQuery(const math::AABB<_T> &AABB,
                               std::vector<const Object *> &result,
+                              unsigned short runNum,
                               const uint32_t mask) const
 {
     // get the dynamic ones
     for(size_t i = 0, size = mObjects.size(); i < size; ++i){
-        const Object *&aux = mObjects[i];
-        if((aux->mGroupMask & mask)
-            && (AABB.collide(aux->mAABB))){
+        const Object *aux = mObjects[i];
+        if((aux->mGroupMask & mask) &&
+                (aux->mCheckRun != runNum) &&
+                (AABB.collide(aux->mAABB))){
             // check for furder collision here... or not?
-            mObjects.push_back(aux);
+            aux->mCheckRun = runNum;
+            result.push_back(aux);
         }
     }
 }
 
-
+template<typename _T>
 inline void
 TwoDimCell::getCollisionQuery(const math::Vector2<_T> &point,
                               std::vector<const Object *> &result,
+                              unsigned short runNum,
                               const uint32_t mask) const
 {
     // get the dynamic ones
     for(size_t i = 0, size = mObjects.size(); i < size; ++i){
-        const Object *&aux = mObjects[i];
-        if((aux->mGroupMask & mask)
-            && (aux->mAABB.checkPointInside(point))){
+        const Object *aux = mObjects[i];
+        if((aux->mGroupMask & mask) &&
+                (aux->mCheckRun != runNum) &&
+                (aux->mAABB.checkPointInside(point))){
             // check for furder collision here... or not?
-            mObjects.push_back(aux);
+            aux->mCheckRun = runNum;
+            result.push_back(aux);
         }
     }
 }
