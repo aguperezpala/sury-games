@@ -1,20 +1,20 @@
 /*
- * Line.cpp
+ * Entity.cpp
  *
- *  Created on: Feb 20, 2013
+ *  Created on: Feb 24, 2013
  *      Author: agustin
  */
 
-#include "Line.h"
+#include "Entity.h"
 
-namespace math {
+namespace scene {
 
-Line::Line() {
+Entity::Entity() {
     // TODO Auto-generated constructor stub
 
 }
 
-Line::~Line() {
+Entity::~Entity() {
     // TODO Auto-generated destructor stub
 }
 
