@@ -42,9 +42,9 @@ public:
 
     /**
      * @brief Position query function
-     * @return pos   The position where the object is
+     * @param pos   The position where the object is
      */
-    inline const math::Vector2f &position(void) const;
+    inline void position(math::Vector2f &pos) const;
 
     /**
      * @brief User defined functions.
@@ -53,6 +53,19 @@ public:
     inline void userDefined(_T *&result);
     inline const void *userDefined(void) const;
     inline void setUserDefined(void *o);
+
+    /**
+     * @brief Returns the AABB associated to this object
+     * @returns the AABB of this object
+     */
+    inline const math::AABBf &aabb(void) const;
+    inline math::AABBf &aabb(void);
+
+    /**
+     * @brief Set the AABB associated to this object
+     * @param aabb  the new AABB for this object
+     */
+    inline void setAABB(const math::AABBf &aabb);
 
 
 private:
@@ -90,10 +103,10 @@ Object::setPosition(const math::Vector2f &pos)
 {
     mAABB.setPosition(pos);
 }
-inline const math::Vector2f &
-Object::position(void) const
+inline void
+Object::position(math::Vector2f &pos) const
 {
-    return mAABB.pos;
+    mAABB.center(pos);
 }
 
 template <typename _T>
@@ -113,6 +126,21 @@ Object::setUserDefined(void *o)
     mUserDefined = o;
 }
 
+inline const math::AABBf &
+Object::aabb(void) const
+{
+    return mAABB;
+}
+inline math::AABBf &
+Object::aabb(void)
+{
+    return mAABB;
+}
+inline void
+Object::setAABB(const math::AABBf &aabb)
+{
+    mAABB = aabb;
+}
 }
 
 #endif /* OBJECT_H_ */

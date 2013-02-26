@@ -12,6 +12,8 @@
 
 #include <math/Vector2.h>
 #include <math/Matrix4.h>
+#include <space_partition/Object.h>
+#include <space_partition/SpacePartition.h>
 
 #include "Entity.h"
 
@@ -25,7 +27,6 @@ class Node {
 public:
 
     typedef std::vector<Node *> NodeVec;
-    typedef std::vector<Entity *> EntityVec;
 
 public:
     Node();
@@ -43,7 +44,7 @@ public:
      *        Node.
      * @param node  The node to be child of this one
      */
-    void addChilde(Node *child);
+    void addChild(Node *child);
 
     /**
      * @brief create a child joint from this one
@@ -59,12 +60,25 @@ public:
     inline NodeVec &getChildrens(void);
 
     /**
-     * @brief Returns the entities of this node
-     * @returns the vector of entities associated to this node
+     * @brief Returns the entity of this node
+     * @returns the associated entity of this node
      */
-    inline const EntityVec &getEntities(void) const;
-    inline EntityVec &getEntities(void);
+    inline const Entity *getEntity(void) const;
+    inline Entity *getEntity(void);
 
+    /**
+     * @brief Set the entity to be handled by this node
+     * @param entity    The entity to be associated to this node
+     */
+    void setEntity(Entity *entity);
+
+    /**
+     * @brief Show / Hide the node in the scene
+     * @param   show    If show is true the scene node will be shown in the screen
+     *                  if show is false the scene node will not.
+     */
+    inline void setVisible(bool show);
+    inline bool isVisible(void) const;
 
     // Node transformations function
     //
@@ -127,30 +141,228 @@ public:
     inline const math::Matrix4 &transformationMat(void) const;
 
     /**
-     * @brief Returns the current rectangle of this node (bounding box)
-     *        in the world position.
-     * @returns the rectangle in the world position
+     * @brief Set the vector where the dirty nodes will be pushed back
+     * @param dirtyNodes    The vector where the dirty nodes will be stored
      */
-    inline const math::AABBf &worldAABB(void) const;
+    static void setDirtyNodesContainer(NodeVec *dirtyNodes);
 
+    /**
+     * @brief Set the space partition manager used by the scene
+     * @param spaceManager    The SpacePartition manager we want to use
+     */
+    static void setSpacePartitionManager(s_p::SpacePartition *spaceManager);
 
+private:
+    // TODO: friend class here the SceneManager
+
+    /**
+     * @brief Function called by the SceneManager to update the world node
+     *        transformation (using the accumulated parents matrices)
+     * @param   transform       The parent accumulated transformation
+     * @param   worldMatrix     The resulting world matrix for this node
+     */
+    void updateNodeTransformation(const math::Matrix4 &transform,
+                                  math::Matrix4 &worldMatrix);
+
+    /**
+     * @brief Auxiliary function to mark the node as dirty if it wasn't and
+     *        put it in the dirty nodes container
+     */
+    inline void handleDirty(void);
+
+    /**
+     * @brief Function that checks for cicles in the graph
+     * @param node  The node that will be parent of this one
+     * @returns     true if there are cycles, false otherwise
+     */
+    bool checkCycles(Node *node) const;
+
+    /**
+     * @brief Returns the associate space object to be handled from outside
+     * @returns spaceObject associated to this node
+     */
+    inline s_p::Object &spaceObject(void);
 
 private:
 
     struct Flags {
         unsigned char dirty : 1;
+        unsigned char visible : 1;
     };
 
-    math::AABBf mRect;
+    // used to represent the AABB of this node
+    s_p::Object mSpaceObject;
+    // values of the node that will form the transformation matrix
     math::Vector2f mPosition;
     math::Vector2f mScale;
     float mRotation;
     math::Matrix4 mTransformationMat;
+    // Nodes and entity
     Node *mParent;
     NodeVec mChilds;
-    EntityVec mEntities;
+    Entity *mEntity;
+    // flags of the node
     Flags mFlags;
+    // Id of the node
+    size_t mID;
+
+    // static container for all the nodes
+    static NodeVec *sDirtyNodesCont;
+    // the SpacePartition manager used for the scene
+    static s_p::SpacePartition *sSpaceManager;
 };
+
+
+// Inline implementations
+//
+
+inline void
+Node::handleDirty(void)
+{
+    if (mFlags.dirty) {
+        return;
+    }
+    // if isn't dirty then mark it and put it in the container
+    mFlags.dirty = 1;
+    mID = sDirtyNodesCont->size();
+    sDirtyNodesCont->push_back(this);
+}
+
+inline s_p::Object &
+Node::spaceObject(void)
+{
+    return mSpaceObject;
+}
+
+inline const Node *
+Node::parent(void) const
+{
+    return mParent;
+}
+inline Node *
+Node::parent(void)
+{
+    return mParent;
+}
+
+inline const Node::NodeVec &
+Node::getChildrens(void) const
+{
+    return mChilds;
+}
+inline Node::NodeVec &
+Node::getChildrens(void)
+{
+    return mChilds;
+}
+
+inline const Entity *
+Node::getEntity(void) const
+{
+    return mEntity;
+}
+inline Entity *
+Node::getEntity(void)
+{
+    return mEntity;
+}
+
+inline void
+Node::setVisible(bool show)
+{
+    mFlags.visible = show;
+}
+inline bool
+Node::isVisible(void) const
+{
+    return mFlags.visible;
+}
+
+// Node transformations function
+//
+inline void
+Node::setPosition(const math::Vector2f &pos)
+{
+    mPosition = pos;
+    handleDirty();
+}
+inline void
+Node::setPosition(float x, float y)
+{
+    mPosition.x = x;
+    mPosition.y = y;
+    handleDirty();
+}
+
+
+inline const math::Vector2f &
+Node::position(void) const
+{
+    return mPosition;
+}
+
+
+inline void
+Node::translate(const math::Vector2f &t)
+{
+    mPosition += t;
+    handleDirty();
+}
+inline void
+Node::translate(float x, float y)
+{
+    mPosition.x += x;
+    mPosition.y += y;
+    mFlags.positionChange = 1;
+    handleDirty();
+}
+
+inline void
+Node::setScale(const math::Vector2f &s)
+{
+    mScale = s;
+    handleDirty();
+}
+inline void
+Node::setScale(float x, float y)
+{
+    mScale.x = x;
+    mScale.y = y;
+    handleDirty();
+}
+inline const math::Vector2f &
+Node::scale(void) const
+{
+    return mScale;
+}
+
+inline void
+Node::setRotation(float angle)
+{
+    mRotation = angle;
+    handleDirty();
+}
+
+inline float
+Node::rotation(void) const
+{
+    return mRotation;
+}
+
+
+inline void
+Node::setTransformMat(const math::Matrix4 &m)
+{
+    mTransformationMat = m;
+    handleDirty();
+}
+
+inline const math::Matrix4 &
+Node::transformationMat(void) const
+{
+    return mTransformationMat;
+}
+
 
 }
 

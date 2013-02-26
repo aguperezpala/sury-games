@@ -8,6 +8,9 @@
 #ifndef VECTOR2_H_
 #define VECTOR2_H_
 
+
+#include <iostream>
+
 namespace math {
 
 template<typename _T>
@@ -147,6 +150,12 @@ public:
     inline Vector2 rotaitXDegrees (const _T rotM[][2]) const {
         return Vector2( x * rotM[0][0] + y * rotM[1][0],
                       x * rotM[0][1] + y * rotM[1][1]);
+    }
+
+    inline friend std::ostream& operator<<(std::ostream& o, const Vector2<_T>& v)
+    {
+        o << "[" << v.x << ", " << v.y << "]";
+        return o;
     }
 
 };

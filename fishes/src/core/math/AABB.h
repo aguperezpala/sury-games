@@ -8,6 +8,9 @@
 #ifndef AABB_H_
 #define AABB_H_
 
+
+#include <iostream>
+
 #include "Vector2.h"
 
 namespace math {
@@ -19,14 +22,19 @@ class AABB {
 public:
     Vector2<_T> tl;
     Vector2<_T> br;
-    Vector2<_T> pos;
 
     AABB(){};
     AABB(const Vector2<_T> &topLeft, const Vector2<_T> &bottomRight)
     {
         tl = topLeft;
         br = bottomRight;
-        pos = (tl + br) * 0.5f;
+    }
+
+    // ge the center point (position)
+    inline void center(Vector2<_T> &center) const
+    {
+        center.x = (br.x - tl.x) * 0.5f;
+        center.y = (tl.y - br.y) * 0.5f;
     }
 
     // check if a point is inside of the box
@@ -40,7 +48,6 @@ public:
     {
         tl += v;
         br += v;
-        pos += v;
     }
 
     inline void setSize(const _T x, const _T y)
@@ -48,8 +55,6 @@ public:
         // init at the (0,0) pos
         tl.x = 0; tl.y = y;
         br.x = x; br.y = 0;
-        pos.x = x *0.5f;
-        pos.y = y *0.5f;
     }
 
     inline _T getHeight(void) const {return tl.y - br.y;}
@@ -62,7 +67,6 @@ public:
         tl.x = v.x - aux; br.x = v.x + aux;
         aux = (tl.y - br.y) * 0.5f;
         tl.y = aux + v.y; br.y = v.y - aux;
-        pos = v;
     }
 
     // check the collision
@@ -71,6 +75,13 @@ public:
         return !((o.br.x < tl.x) || (o.tl.x > br.x) || (o.tl.y < br.y) ||
                 (tl.y < o.br.y));
     }
+
+    inline friend std::ostream& operator<<(std::ostream& o, const AABB<_T>& aabb)
+    {
+        o << "AABB(tl:" << aabb.tl << ", br: " << aabb.br << ")" << std::endl;
+        return o;
+    }
+
 };
 
 // typedef the AABBf

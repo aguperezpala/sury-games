@@ -8,6 +8,8 @@
 #ifndef MATRIX4_H_
 #define MATRIX4_H_
 
+#include <iostream>
+
 #include <debug/DebugUtil.h>
 
 #include "Vector2.h"
@@ -20,17 +22,9 @@ public:
     inline Matrix4(){};
     inline ~Matrix4(){};
 
-    /** Default constructor.
-        @note
-            It does <b>NOT</b> initialize the matrix for efficiency.
-    */
-    inline Matrix4()
-    {
-    }
-
     inline Matrix4(float a00, float a01, float a02,
-            float a10, float a11, float a12,
-            float a20, float a21, float a22);
+                   float a10, float a11, float a12,
+                   float a20, float a21, float a22);
 
 
     // Constructor from a list of elements
@@ -40,14 +34,18 @@ public:
                    float m30, float m31, float m32, float m33 );
 
     // Construct from a vector of elements
-    inline Matrix4(const float *m)
+    inline Matrix4(const float *m);
 
     // copy constructor
     inline Matrix4(const Matrix4& m4x4);
 
-    // return the Row of the matrix
-    inline float* operator[](size_t iRow);
-    inline const float *operator[](size_t iRow) const;
+    // set the new values for this matrix
+    inline void setValues(float a00, float a01, float a02,
+                          float a10, float a11, float a12,
+                          float a20, float a21, float a22);
+
+    // return the n-th element of the matrix
+    inline float operator[](size_t index) const;
 
     // Combine matrices and return the reference of this one
     inline Matrix4 &combine(const Matrix4 &other);
@@ -55,13 +53,12 @@ public:
 
     // Matrix concatenation (combine) using '*'.
     inline Matrix4 operator*( const Matrix4 &m2 ) const;
-    inline Matrix4 &operator*=(const Matrix4 &m2 ) const;
+    inline Matrix4 &operator*=(const Matrix4 &m2 );
 
     // Transform a point
     inline Vector2f transformPoint(const Vector2f& point) const;
     inline Vector2f transformPoint(float x, float y) const;
     inline Vector2f operator*(const Vector2f& point) const;
-    inline Vector2f operator*(float x, float y) const;
 
 
     // Tests 2 matrices for equality / inequality.
@@ -73,7 +70,7 @@ public:
 
     // Multiply by scalar
     inline Matrix4 operator*(float scalar) const;
-    inline Matrix4& operator*=(float scalar) const;
+    inline Matrix4& operator*=(float scalar);
 
     // ---------------------------------------------------------
     // Translation / Rotation / Scale operations
@@ -109,6 +106,23 @@ public:
     static const Matrix4 ZERO;
     static const Matrix4 IDENTITY;
 
+    inline friend std::ostream&
+    operator<<(std::ostream& o, const Matrix4& m)
+    {
+        o << "Matrix4(\n";
+        for(size_t i = 0; i < 16; ++i){
+            o << m[i];
+            if (i < 15) {
+                o << "\t";
+            }
+            if (((i+1) % 4 == 0)) {
+                o << std::endl;
+            }
+        }
+        o << ")" << std::endl;
+        return o;
+    }
+
 private:
     float mM[16];
 };
@@ -137,7 +151,7 @@ inline Matrix4::Matrix4(float m00, float m01, float m02, float m03,
     mM[12] = m30;
     mM[13] = m31;
     mM[14] = m32;
-    mv[15] = m33;
+    mM[15] = m33;
 }
 
 inline Matrix4::Matrix4(float a00, float a01, float a02,
@@ -166,21 +180,22 @@ inline Matrix4::Matrix4(const Matrix4& m)
         mM[i] = m.mM[i];
     }
 }
-
-
-inline float*
-Matrix4::operator[](size_t iRow)
+inline void
+Matrix4::setValues(float a00, float a01, float a02,
+                   float a10, float a11, float a12,
+                   float a20, float a21, float a22)
 {
-    ASSERT(iRow < 4);
-    return mM[iRow * 4];
+    mM[0] = a00; mM[4] = a01; mM[8]  = 0.f; mM[12] = a02;
+    mM[1] = a10; mM[5] = a11; mM[9]  = 0.f; mM[13] = a12;
+    mM[2] = 0.f; mM[6] = 0.f; mM[10] = 1.f; mM[14] = 0.f;
+    mM[3] = a20; mM[7] = a21; mM[11] = 0.f; mM[15] = a22;
 }
 
-
-inline const float *
-Matrix4::operator[](size_t iRow) const
+inline float
+Matrix4::operator[](size_t index) const
 {
-    ASSERT(iRow < 4);
-    return mM[iRow * 4];
+    ASSERT(index < 16);
+    return mM[index];
 }
 
 
@@ -248,24 +263,17 @@ Matrix4::operator*(const Vector2f& point) const
 }
 
 
-inline Vector2f
-Matrix4::operator*(float x, float y) const
-{
-    return transformPoint(x, y);
-}
-
-
 inline bool
 Matrix4::operator==(const Matrix4& m2) const
 {
-    if(mM[0][0] != m2.mM[0][0] || mM[0][1] != m2.mM[0][1] ||
-            mM[0][2] != m2.mM[0][2] || mM[0][3] != m2.mM[0][3] ||
-            mM[1][0] != m2.mM[1][0] || mM[1][1] != m2.mM[1][1] ||
-            mM[1][2] != m2.mM[1][2] || mM[1][3] != m2.mM[1][3] ||
-            mM[2][0] != m2.mM[2][0] || mM[2][1] != m2.mM[2][1] ||
-            mM[2][2] != m2.mM[2][2] || mM[2][3] != m2.mM[2][3] ||
-            mM[3][0] != m2.mM[3][0] || mM[3][1] != m2.mM[3][1] ||
-            mM[3][2] != m2.mM[3][2] || mM[3][3] != m2.mM[3][3] )
+    if(mM[0] != m2.mM[0] || mM[1] != m2.mM[1] ||
+            mM[2] != m2.mM[2] || mM[3] != m2.mM[3] ||
+            mM[4] != m2.mM[4] || mM[5] != m2.mM[5] ||
+            mM[6] != m2.mM[6] || mM[7] != m2.mM[7] ||
+            mM[8] != m2.mM[8] || mM[9] != m2.mM[9] ||
+            mM[10] != m2.mM[10] || mM[11] != m2.mM[11] ||
+            mM[12] != m2.mM[12] || mM[13] != m2.mM[13] ||
+            mM[14] != m2.mM[14] || mM[15] != m2.mM[15])
         return false;
     return true;
 }
@@ -294,7 +302,7 @@ Matrix4::operator*(float scalar) const
                    mM[12] * scalar, mM[13] * scalar, mM[14] * scalar, mM[15] * scalar);
 }
 inline Matrix4&
-Matrix4::operator*=(float scalar) const
+Matrix4::operator*=(float scalar)
 {
     for (size_t i = 0; i < 16; ++i){
         mM[i] *= scalar;
@@ -334,7 +342,7 @@ Matrix4::getTranslation(void) const
     return Vector2f(mM[3], mM[7]);
 }
 
-inline static Matrix4
+inline Matrix4
 Matrix4::getTranslationMat(const Vector2f& v)
 {
     return Matrix4(1.0f, 0.0f, 0.0f, v.x,
@@ -342,7 +350,7 @@ Matrix4::getTranslationMat(const Vector2f& v)
                    0.0f, 0.0f, 1.0f, 0.f,
                    0.0f, 0.0f, 0.f, 1.0f);
 }
-inline static Matrix4
+inline Matrix4
 Matrix4::getTranslationMat(float x, float y)
 {
     return Matrix4(1.0f, 0.0f, 0.0f, x,
@@ -423,6 +431,8 @@ Matrix4::transformAABB(AABBf &aabb) const
     aabb.br.x = right;
     aabb.br.y = top;
 }
+
+
 
 
 }

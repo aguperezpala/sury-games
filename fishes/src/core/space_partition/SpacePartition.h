@@ -320,7 +320,10 @@ SpacePartition::numCellsy(void) const
 inline void
 SpacePartition::translateObject(Object *obj, const math::Vector2f &t)
 {
-    setObjectPosition(obj, obj->position() + t);
+    math::Vector2f pos;
+    obj->position(pos);
+    pos += t;
+    setObjectPosition(obj, pos);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
