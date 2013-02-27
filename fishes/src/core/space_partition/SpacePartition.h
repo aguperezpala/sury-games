@@ -144,6 +144,13 @@ public:
      */
     void setObjectPosition(Object *obj, const math::Vector2f &pos);
 
+    /**
+     * @brief Update the AABB of an object that was added before to this manager
+     * @param obj   The object that we want to update the AABB
+     * @param aabb  The new AABB we want to set to the object
+     */
+    void updateObject(Object *obj, const math::AABBf &aabb);
+
 
     // Space Partition querys
     //
@@ -216,6 +223,21 @@ private:
     inline void getCellsFromAABB(const math::AABBf &aabb,
                                  std::vector<TwoDimCell*> &buff);
 
+    /**
+     * Simple segment intersection test
+     */
+    inline bool segmentIntersection(const size_t a, const size_t b,
+                                    const size_t c, const size_t d);
+
+
+    /**
+     * Remove an object from the actual position and add it to the new one
+     * trying to be efficently
+     */
+    inline void updateObject(size_t beforeBIndex, const size_t beforeEIndex,
+                             size_t afterBIndex, const size_t afterEBIndex,
+                             Object *obj);
+
 
 private:
     float mFactorX;
@@ -277,6 +299,50 @@ SpacePartition::getCellsFromAABB(const math::AABBf &aabb,
     mMatrix.getCell(getXPosition(aabb.tl.x), getYPosition(aabb.tl.y),
                     getXPosition(aabb.br.x), getYPosition(aabb.br.y),
                     buff);
+}
+
+inline bool
+SpacePartition::segmentIntersection(const size_t a, const size_t b,
+                                    const size_t c, const size_t d)
+{
+    return (b <= d && b >= c) || (a >= c && a <= d) || (a <= c && b >= d);
+}
+
+inline void
+SpacePartition::updateObject(size_t beforeBIndex, const size_t beforeEIndex,
+                             size_t afterBIndex, const size_t afterEBIndex,
+                             Object *obj)
+{
+    // calculate the intersection
+    if (!segmentIntersection(beforeBIndex, beforeEIndex,
+            afterBIndex, afterEIndex)){
+        // they not intersect, remove the object in the old cells and then
+        // add it to the new one
+        for(; beforeBIndex < beforeEIndex; ++beforeBIndex){
+            mMatrix.getCell(beforeBIndex).removeObject(obj);
+        }
+        for(; afterBIndex < afterEIndex; ++afterBIndex){
+            mMatrix.getCell(afterBIndex).addObject(obj);
+        }
+        return;
+    }
+
+    // they intersect, we need to get the indices for the new cells only
+    // and remove the old ones
+    for(size_t i = beforeBIndex; i < afterBIndex; ++i){
+        mMatrix.getCell(i).removeObject(obj);
+    }
+    for(size_t i = beforeEIndex; i < afterEIndex; ++i){
+        mMatrix.getCell(i).removeObject(obj);
+    }
+
+    // add
+    for(size_t i = afterBIndex; i < beforeBIndex; ++i){
+        mMatrix.getCell(i).addObject(obj);
+    }
+    for(size_t i = afterEIndex; i < beforeEIndex; ++i){
+        mMatrix.getCell(i).addObject(obj);
+    }
 }
 
 inline bool

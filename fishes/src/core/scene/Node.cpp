@@ -84,6 +84,8 @@ Node::Node()
 Node::~Node()
 {
     // TODO remove from the parent, remove the childs?
+    detachFromParent();
+    sSpaceManager->removeObject(&mSpaceObject);
 
 }
 
@@ -96,6 +98,9 @@ Node::addChild(Node *child)
         debuERROR("Cycle found!\n");
         ASSERT(false);
     }
+    // detach from parent this one
+    child->detachFromParent();
+
     // add the node to be child of this one
     mChilds.push_back(child);
     child->mParent = this;
@@ -108,6 +113,50 @@ Node::createChild(void)
     Node *result = new Node();
     addChild(result);
     return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+bool
+Node::isChild(const Node *child) const
+{
+    for(size_t i = 0, size = mChilds.size(); i < size; ++i) {
+        if (mChilds[i] == child){
+            return true;
+        }
+    }
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+Node::removeChild(Node *child)
+{
+    ASSERT(child);
+    ASSERT(isChild(child));
+    // remove it from the vector
+    for(size_t i = 0, size = mChilds.size(); i < size; ++i){
+        if (mChilds[i] == child){
+            mChilds[i] = mChilds.back();
+            mChilds.pop_back();
+            break;
+        }
+    }
+    child->mParent = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+Node::detachFromParent(void)
+{
+    if (mParent == 0){
+        // nothing to do
+        return;
+    }
+
+    // call the parent to remove the child
+    mParent->removeChild(this);
+
+    // mParent will be set to 0 in the father
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,16 +198,14 @@ Node::updateNodeTransformation(const math::Matrix4 &transform,
 
     // compute the rect to be used for the space partition if we have an entity
     if (mEntity != 0){
-        math::AABBf & aabb = mSpaceObject.aabb();
-        mEntity->boundingBox(aabb);
+        math::AABBf newAABB = mSpaceObject.aabb();
+        mEntity->boundingBox(newAABB);
 
         // transform the aabb using the world matrix
-        worldTransform.transformAABB(aabb);
+        worldTransform.transformAABB(newAABB);
 
-        // now we have to move the spaceObject to the correct place
-        math::Vector2f pos;
-        aabb.center(pos);
-        sSpaceManager->setObjectPosition(mSpaceObject, pos);
+        // now we have to update the spaceObject to the correct place
+        sSpaceManager->updateObject(&mSpaceObject, newAABB);
     }
 
 }

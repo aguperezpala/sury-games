@@ -10,16 +10,6 @@
 #include <algorithm>
 
 
-// Auxiliary functions
-//
-namespace {
-static inline bool
-segmentIntersection(const size_t a, const size_t b,
-                    const size_t c, const size_t d)
-{
-    return (b <= d && b >= c) || (a >= c && a <= d) || (a <= c && b >= d);
-}
-}
 
 namespace s_p {
 
@@ -171,6 +161,8 @@ void
 SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
 {
     ASSERT(obj);
+    ASSERT(exists(obj));
+
     // First get the actual indices for the object
     const math::Vector2f &tl = obj->mAABB.tl;
     const math::Vector2f &br = obj->mAABB.br;
@@ -183,38 +175,31 @@ SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
     size_t afterBIndex = mMatrix.getIndex(tl.x, tl.y);
     const size_t afterEIndex = mMatrix.getIndex(br.x, br.y);
 
-    // calculate the intersection
-    if (!segmentIntersection(beforeBIndex, beforeEIndex,
-            afterBIndex, afterEIndex)){
-        // they not intersect, remove the object in the old cells and then
-        // add it to the new one
-        for(; beforeBIndex < beforeEIndex; ++beforeBIndex){
-            mMatrix.getCell(beforeBIndex).removeObject(obj);
-        }
-        for(; afterBIndex < afterEIndex; ++afterBIndex){
-            mMatrix.getCell(afterBIndex).addObject(obj);
-        }
-        return;
-    }
+    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEBIndex, obj);
 
-    // they intersect, we need to get the indices for the new cells only
-    // and remove the old ones
-    for(size_t i = beforeBIndex; i < afterBIndex; ++i){
-        mMatrix.getCell(i).removeObject(obj);
-    }
-    for(size_t i = beforeEIndex; i < afterEIndex; ++i){
-        mMatrix.getCell(i).removeObject(obj);
-    }
-
-    // add
-    for(size_t i = afterBIndex; i < beforeBIndex; ++i){
-        mMatrix.getCell(i).addObject(obj);
-    }
-    for(size_t i = afterEIndex; i < beforeEIndex; ++i){
-        mMatrix.getCell(i).addObject(obj);
-    }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void
+SpacePartition::updateObject(Object *obj, const math::AABBf &aabb)
+{
+    ASSERT(obj);
+    ASSERT(exists(obj));
+
+    // First get the actual indices for the object
+    const math::Vector2f &tl = obj->mAABB.tl;
+    const math::Vector2f &br = obj->mAABB.br;
+    size_t beforeBIndex = mMatrix.getIndex(tl.x, tl.y);
+    const size_t beforeEIndex = mMatrix.getIndex(br.x, br.y);
+
+    obj->setAABB(aabb);
+
+    // get the new positions now
+    size_t afterBIndex = mMatrix.getIndex(aabb.tl.x, aabb.tl.y);
+    const size_t afterEIndex = mMatrix.getIndex(aabb.br.x, aabb.br.y);
+
+    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEBIndex, obj);
+}
 
 
 // Space Partition querys

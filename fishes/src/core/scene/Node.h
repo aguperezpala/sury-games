@@ -53,6 +53,28 @@ public:
     Node *createChild(void);
 
     /**
+     * @brief Check for a child
+     * @param child  The node we want to check (if is child of this or not)
+     * @returns true if child is children of this node, false otherwise
+     * @note Is O(n) where n is the number of childrens
+     */
+    bool isChild(const Node *child) const;
+
+    /**
+     * @brief Remove a child from this node
+     * @param child     The child to be removed
+     */
+    void removeChild(Node *child);
+
+    /**
+     * @brief Detachs this node from the parent. This way the node will not be in
+     *        the graph and will be not updated.
+     * @note To atach the node again to a joint you can call the addChild()
+     *       function
+     */
+    void detachFromParent(void);
+
+    /**
      * @brief Returns all the childrens of this node
      * @returns the vector of the children nodes
      */
@@ -183,6 +205,16 @@ private:
      */
     inline s_p::Object &spaceObject(void);
 
+    /**
+     * @brief Function used to attach / detach the collision object of this node
+     *        from the manager. This function should be called from the
+     *        SceneManager
+     * @param attach    If true the SpaceObject will be attached to the
+     *                  SpaceManager, if it is false it will be removed
+     */
+    inline void attachSpaceObject(void);
+    inline void detachSpaceObject(void);
+
 private:
 
     struct Flags {
@@ -233,6 +265,23 @@ Node::spaceObject(void)
 {
     return mSpaceObject;
 }
+
+inline void
+Node::attachSpaceObject(void)
+{
+    if (sSpaceManager->exists(&mSpaceObject)){
+        return;
+    }
+    sSpaceManager->addObject(&mSpaceObject);
+}
+inline void
+Node::detachSpaceObject(void)
+{
+    if (sSpaceManager->exists(&mSpaceObject)){
+        sSpaceManager->removeObject(&mSpaceObject);
+    }
+}
+
 
 inline const Node *
 Node::parent(void) const
