@@ -9,13 +9,14 @@
 
 #include <set>
 #include <deque>
+#include <cmath>
 
 #include <debug/DebugUtil.h>
 
 
 namespace scene {
 
-Node::NodeVec *Node::sDirtyNodesCont = 0;
+NodeVec *Node::sDirtyNodesCont = 0;
 s_p::SpacePartition *Node::sSpaceManager = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ Node::addChild(Node *child)
 {
     ASSERT(child);
     if (checkCycles(child)) {
-        debuERROR("Cycle found!\n");
+        debugERROR("Cycle found!\n");
         ASSERT(false);
     }
     // detach from parent this one
@@ -170,8 +171,7 @@ Node::setEntity(Entity *entity)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-Node::updateNodeTransformation(const math::Matrix4 &transform,
-                               math::Matrix4 &worldTransform)
+Node::updateNodeTransformation(const math::Matrix4 &transform)
 {
     ASSERT(mFlags.visible);
 
@@ -193,8 +193,8 @@ Node::updateNodeTransformation(const math::Matrix4 &transform,
     }
 
     // create the matrix that we will use for the world transformation
-    worldTransform = transform;
-    worldTransform *= mTransformationMat;
+    mWorldMat = transform;
+    mWorldMat *= mTransformationMat;
 
     // compute the rect to be used for the space partition if we have an entity
     if (mEntity != 0){
@@ -202,7 +202,7 @@ Node::updateNodeTransformation(const math::Matrix4 &transform,
         mEntity->boundingBox(newAABB);
 
         // transform the aabb using the world matrix
-        worldTransform.transformAABB(newAABB);
+        mWorldMat.transformAABB(newAABB);
 
         // now we have to update the spaceObject to the correct place
         sSpaceManager->updateObject(&mSpaceObject, newAABB);

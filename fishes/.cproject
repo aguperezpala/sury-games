@@ -24,6 +24,7 @@
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.109704894" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/extlib/sfml2.0}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.2005994487" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -32,6 +33,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/extlib/sfml2.0/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
 									<listOptionValue builtIn="false" value="/sury-fishes/src/common"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.542993609" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -39,6 +41,7 @@
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.449322881" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/extlib/sfml2.0}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1010090206" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>

@@ -19,15 +19,17 @@
 
 namespace scene {
 
+// Typedefs
+//
+class Node;
+typedef std::vector<Node *> NodeVec;
+
 // Fordward declaration
 //
 class Entity;
+class SceneManager;
 
 class Node {
-public:
-
-    typedef std::vector<Node *> NodeVec;
-
 public:
     Node();
     ~Node();
@@ -175,29 +177,24 @@ public:
     static void setSpacePartitionManager(s_p::SpacePartition *spaceManager);
 
 private:
+
     // TODO: friend class here the SceneManager
+    //
+    friend SceneManager;
 
     /**
      * @brief Function called by the SceneManager to update the world node
      *        transformation (using the accumulated parents matrices)
      * @param   transform       The parent accumulated transformation
-     * @param   worldMatrix     The resulting world matrix for this node
      */
-    void updateNodeTransformation(const math::Matrix4 &transform,
-                                  math::Matrix4 &worldMatrix);
+    void updateNodeTransformation(const math::Matrix4 &transform);
 
     /**
-     * @brief Auxiliary function to mark the node as dirty if it wasn't and
-     *        put it in the dirty nodes container
+     * @brief Returns the world transformation matrix for this node
+     * @returns the world transformation matrix
      */
-    inline void handleDirty(void);
-
-    /**
-     * @brief Function that checks for cicles in the graph
-     * @param node  The node that will be parent of this one
-     * @returns     true if there are cycles, false otherwise
-     */
-    bool checkCycles(Node *node) const;
+    inline const math::Matrix4 &
+    getWorldMat(void) const;
 
     /**
      * @brief Returns the associate space object to be handled from outside
@@ -215,6 +212,26 @@ private:
     inline void attachSpaceObject(void);
     inline void detachSpaceObject(void);
 
+    /**
+     * @brief Check for the node dirtyness
+     * @returns True if the node is dirty, false otherwise
+     */
+    inline bool isDirty(void) const;
+
+    /**
+      * @brief Auxiliary function to mark the node as dirty if it wasn't and
+      *        put it in the dirty nodes container
+      */
+     inline void handleDirty(void);
+
+     /**
+      * @brief Function that checks for cicles in the graph
+      * @param node  The node that will be parent of this one
+      * @returns     true if there are cycles, false otherwise
+      */
+     bool checkCycles(Node *node) const;
+
+
 private:
 
     struct Flags {
@@ -229,6 +246,7 @@ private:
     math::Vector2f mScale;
     float mRotation;
     math::Matrix4 mTransformationMat;
+    math::Matrix4 mWorldMat;
     // Nodes and entity
     Node *mParent;
     NodeVec mChilds;
@@ -248,6 +266,12 @@ private:
 // Inline implementations
 //
 
+inline bool
+Node::isDirty(void) const
+{
+    return mFlags.dirty;
+}
+
 inline void
 Node::handleDirty(void)
 {
@@ -258,6 +282,14 @@ Node::handleDirty(void)
     mFlags.dirty = 1;
     mID = sDirtyNodesCont->size();
     sDirtyNodesCont->push_back(this);
+}
+
+inline const math::Matrix4 &
+Node::getWorldMat(void) const
+{
+    // ensure we are not returning crap
+    ASSERT(!mFlags.dirty);
+    return mWorldMat;
 }
 
 inline s_p::Object &
@@ -294,12 +326,12 @@ Node::parent(void)
     return mParent;
 }
 
-inline const Node::NodeVec &
+inline const NodeVec &
 Node::getChildrens(void) const
 {
     return mChilds;
 }
-inline Node::NodeVec &
+inline NodeVec &
 Node::getChildrens(void)
 {
     return mChilds;
@@ -362,7 +394,6 @@ Node::translate(float x, float y)
 {
     mPosition.x += x;
     mPosition.y += y;
-    mFlags.positionChange = 1;
     handleDirty();
 }
 
