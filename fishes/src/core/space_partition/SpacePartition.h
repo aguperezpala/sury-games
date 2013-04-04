@@ -436,8 +436,9 @@ SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
 
     // we do not reserve the size for the vector becase we assume that we
     // we will use always the same vector
-    for(; bIndex < eIndex; ++bIndex)
+    for(; bIndex < eIndex; ++bIndex) {
         result.push_back(&mCells[bIndex]);
+    }
 }
 
 inline size_t

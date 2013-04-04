@@ -206,7 +206,16 @@ Node::updateNodeTransformation(const math::Matrix4 &transform)
         // now we have to update the spaceObject to the correct place
         sSpaceManager->updateObject(&mSpaceObject, newAABB);
     }
+}
 
+void
+Node::updateNodeAndChildsTransforms(const math::Matrix4 &parentTransform)
+{
+    updateNodeTransformation(parentTransform);
+    // call the childrens transformation
+    for (size_t i = 0, size = mChilds.size(); i < size; ++i) {
+        (mChilds[i])->updateNodeAndChildsTransforms(mWorldMat);
+    }
 }
 
 

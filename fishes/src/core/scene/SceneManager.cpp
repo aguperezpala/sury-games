@@ -60,14 +60,18 @@ SceneManager::update(void)
     // clear the nodes
     mDirtyNodes.clear();
 
-    // update each of the nodes
+    // update each of the nodes of each of the "root's" dirty nodes
     for(std::set<Node *>::iterator it = dirtyRoots.begin(),
         eIt = dirtyRoots.end(); it != eIt; ++it){
-        // the root node couldn't be the rootNode
-        ASSERT(*it != mRootNode);
+        ASSERT(*it != mRootNode); // the root node couldn't be the rootNode
 
-        // we have to update down the hierarchy of the root node
-        // TODO:
+        // we have to update down over the hierarchy of the root node.
+        // first get the parent transformation matrix
+        ASSERT((*it)->parent()); // we should have parent since we cannot be the root
+        const math::Matrix4 &parentMatrix =
+            ((*it)->parent()) ? (*it)->parent()->transformationMat() :
+                math::Matrix4::IDENTITY;
+        (*it)->updateNodeAndChildsTransforms(parentMatrix);
     }
 }
 

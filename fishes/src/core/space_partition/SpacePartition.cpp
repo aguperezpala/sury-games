@@ -118,7 +118,7 @@ SpacePartition::addObject(Object *obj)
     // now we have to add to the respectives cells
     getCellsFromObject(obj, mCellAuxBuffer);
     for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
-        (mCellAuxBuffer)[i]->addObject(obj);
+        (mCellAuxBuffer[i])->addObject(obj);
     }
 }
 
@@ -139,7 +139,7 @@ SpacePartition::removeObject(const Object *obj)
     // else we have to remove the object from the cells where it is
     getCellsFromObject(obj, mCellAuxBuffer);
     for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
-        (mCellAuxBuffer)[i]->removeObject(obj);
+        (mCellAuxBuffer[i])->removeObject(obj);
     }
 }
 
@@ -216,7 +216,7 @@ SpacePartition::getIntersections(const Object *obj, ConstObjectVec &objs)
 
     getCellsFromObject(obj, mCellAuxBuffer);
     for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
-        mCellAuxBuffer[i]->getCollisions(obj, objs, mRunNumber);
+        (mCellAuxBuffer[i])->getCollisions(obj, objs, mRunNumber);
     }
 }
 

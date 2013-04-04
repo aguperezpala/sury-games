@@ -38,21 +38,25 @@ public:
      * @brief Returns the parent Node
      * @returns the Parent Node of this one
      */
-    inline const Node *parent(void) const;
-    inline Node *parent(void);
+    inline const Node *
+    parent(void) const;
+    inline Node *
+    parent(void);
 
     /**
      * @brief Add a child to the node. The node shouldn't be child of other
      *        Node.
      * @param node  The node to be child of this one
      */
-    void addChild(Node *child);
+    void
+    addChild(Node *child);
 
     /**
      * @brief create a child joint from this one
      * @returns the new allocated child node
      */
-    Node *createChild(void);
+    Node *
+    createChild(void);
 
     /**
      * @brief Check for a child
@@ -60,13 +64,15 @@ public:
      * @returns true if child is children of this node, false otherwise
      * @note Is O(n) where n is the number of childrens
      */
-    bool isChild(const Node *child) const;
+    bool
+    isChild(const Node *child) const;
 
     /**
      * @brief Remove a child from this node
      * @param child     The child to be removed
      */
-    void removeChild(Node *child);
+    void
+    removeChild(Node *child);
 
     /**
      * @brief Detachs this node from the parent. This way the node will not be in
@@ -74,35 +80,43 @@ public:
      * @note To atach the node again to a joint you can call the addChild()
      *       function
      */
-    void detachFromParent(void);
+    void
+    detachFromParent(void);
 
     /**
      * @brief Returns all the childrens of this node
      * @returns the vector of the children nodes
      */
-    inline const NodeVec &getChildrens(void) const;
-    inline NodeVec &getChildrens(void);
+    inline const NodeVec &
+    getChildrens(void) const;
+    inline NodeVec &
+    getChildrens(void);
 
     /**
      * @brief Returns the entity of this node
      * @returns the associated entity of this node
      */
-    inline const Entity *getEntity(void) const;
-    inline Entity *getEntity(void);
+    inline const Entity *
+    getEntity(void) const;
+    inline Entity *
+    getEntity(void);
 
     /**
      * @brief Set the entity to be handled by this node
      * @param entity    The entity to be associated to this node
      */
-    void setEntity(Entity *entity);
+    void
+    setEntity(Entity *entity);
 
     /**
      * @brief Show / Hide the node in the scene
      * @param   show    If show is true the scene node will be shown in the screen
      *                  if show is false the scene node will not.
      */
-    inline void setVisible(bool show);
-    inline bool isVisible(void) const;
+    inline void
+    setVisible(bool show);
+    inline bool
+    isVisible(void) const;
 
     // Node transformations function
     //
@@ -111,70 +125,84 @@ public:
      * @brief Set the position of this node (relative to the parent)
      * @param pos   The new position of the node
      */
-    inline void setPosition(const math::Vector2f &pos);
-    inline void setPosition(float x, float y);
+    inline void
+    setPosition(const math::Vector2f &pos);
+    inline void
+    setPosition(float x, float y);
 
     /**
      * @brief Return the actual position of the node
      * @returns the position of the node
      */
-    inline const math::Vector2f &position(void) const;
+    inline const math::Vector2f &
+    position(void) const;
 
     /**
      * @brief Translate the actual node (in local space)
      * @param t     The translation vector
      */
-    inline void translate(const math::Vector2f &t);
-    inline void translate(float x, float y);
+    inline void
+    translate(const math::Vector2f &t);
+    inline void
+    translate(float x, float y);
 
     /**
      * @brief Scale the current node (local space)
      * @param s     The scale vector to be applied
      */
-    inline void setScale(const math::Vector2f &s);
-    inline void setScale(float x, float y);
+    inline void
+    setScale(const math::Vector2f &s);
+    inline void
+    setScale(float x, float y);
 
     /**
      * @brief Returns the actual scale
      * @returns the actual scale
      */
-    inline const math::Vector2f &scale(void) const;
+    inline const math::Vector2f &
+    scale(void) const;
 
     /**
      * @brief Apply a rotation to the node (in local space)
      * @param angle The angle to be applied
      */
-    inline void setRotation(float angle);
+    inline void
+    setRotation(float angle);
 
     /**
      * @brief Get the rotation of the node
      * @returns the rotation of the node
      */
-    inline float rotation(void) const;
+    inline float
+    rotation(void) const;
 
     /**
      * @brief Set the new local matrix transformation
      * @param m     The transformation matrix to be set
      */
-    inline void setTransformMat(const math::Matrix4 &m);
+    inline void
+    setTransformMat(const math::Matrix4 &m);
 
     /**
      * @brief Get the transformation matrix associated to this node (local)
      * @returns the local transformation matrix
      */
-    inline const math::Matrix4 &transformationMat(void) const;
+    inline const math::Matrix4 &
+    transformationMat(void) const;
 
     /**
      * @brief Set the vector where the dirty nodes will be pushed back
      * @param dirtyNodes    The vector where the dirty nodes will be stored
      */
-    static void setDirtyNodesContainer(NodeVec *dirtyNodes);
+    static void
+    setDirtyNodesContainer(NodeVec *dirtyNodes);
 
     /**
      * @brief Set the space partition manager used by the scene
      * @param spaceManager    The SpacePartition manager we want to use
      */
-    static void setSpacePartitionManager(s_p::SpacePartition *spaceManager);
+    static void
+    setSpacePartitionManager(s_p::SpacePartition *spaceManager);
 
 private:
 
@@ -185,9 +213,24 @@ private:
     /**
      * @brief Function called by the SceneManager to update the world node
      *        transformation (using the accumulated parents matrices)
-     * @param   transform       The parent accumulated transformation
+     * @param transform     The parent accumulated transformation
      */
-    void updateNodeTransformation(const math::Matrix4 &transform);
+    void
+    updateNodeTransformation(const math::Matrix4 &transform);
+
+    /**
+     * @brief Function called by the SceneManager to update the world node
+     *        transformation (using the accumulated parent's matrices).
+     *        This function will also update automatically all its childrens,
+     *        so calling this function in the rootSceneNode with the identity
+     *        matrix should update all the scene.
+     *        This node will update its world transformation using the
+     *        parentTransform matrix and iterate over all its childrens
+     *        calling this same function with his new world transformation
+     * @param parentTransform   The parent transformation matrix
+     */
+    void
+    updateNodeAndChildsTransforms(const math::Matrix4 &parentTransform);
 
     /**
      * @brief Returns the world transformation matrix for this node
@@ -200,7 +243,8 @@ private:
      * @brief Returns the associate space object to be handled from outside
      * @returns spaceObject associated to this node
      */
-    inline s_p::Object &spaceObject(void);
+    inline s_p::Object &
+    spaceObject(void);
 
     /**
      * @brief Function used to attach / detach the collision object of this node
@@ -209,28 +253,32 @@ private:
      * @param attach    If true the SpaceObject will be attached to the
      *                  SpaceManager, if it is false it will be removed
      */
-    inline void attachSpaceObject(void);
-    inline void detachSpaceObject(void);
+    inline void
+    attachSpaceObject(void);
+    inline void
+    detachSpaceObject(void);
 
     /**
      * @brief Check for the node dirtyness
      * @returns True if the node is dirty, false otherwise
      */
-    inline bool isDirty(void) const;
+    inline bool
+    isDirty(void) const;
 
     /**
       * @brief Auxiliary function to mark the node as dirty if it wasn't and
       *        put it in the dirty nodes container
       */
-     inline void handleDirty(void);
+     inline void
+     handleDirty(void);
 
      /**
       * @brief Function that checks for cicles in the graph
       * @param node  The node that will be parent of this one
       * @returns     true if there are cycles, false otherwise
       */
-     bool checkCycles(Node *node) const;
-
+     bool
+     checkCycles(Node *node) const;
 
 private:
 
@@ -440,6 +488,7 @@ Node::setTransformMat(const math::Matrix4 &m)
 inline const math::Matrix4 &
 Node::transformationMat(void) const
 {
+    ASSERT(mFlags.dirty == false);
     return mTransformationMat;
 }
 
