@@ -35,6 +35,9 @@ include_directories(
 	# SFML local extlib
 	${DEV_ROOT_PATH}/extlib/sfml2.0/include
 	
+	# Root dev path
+	${DEV_ROOT_PATH}
+	
 	# common
 	${DEV_ROOT_PATH}/common
 	
@@ -46,6 +49,7 @@ include_directories(
 include(${DEV_ROOT_PATH}/core/math/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/ui/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
 
 # Set all the libraries here
 # Set the default flags to the build
@@ -55,7 +59,9 @@ add_definitions(-std=c++0x)  # C++11 standard
 add_definitions(-Wall)       # compile with all the warnings
 set(COMMON_LIBRARIES boost_signals boost_system 
                     #sfml 
-                    sfml-graphics sfml-window sfml-system)
+                    sfml-graphics 
+                    sfml-window 
+                    sfml-system)
 
 
 add_executable(fishes WIN32 ${HDRS} ${SRCS}) 

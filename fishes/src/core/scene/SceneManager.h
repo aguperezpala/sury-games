@@ -114,9 +114,9 @@ SceneManager::updateHierarchy(Node *node)
     while (!mNodeQueue.empty()) {
         Node *backNode = mNodeQueue.back();
         mNodeQueue.pop_back();
-        mNodeQueue.insert(backNode->getChildrens().begin(),
-                          backNode->getChildrens().end(),
-                          std::back_inserter(mNodeQueue));
+        mNodeQueue.insert(mNodeQueue.end(),
+                          backNode->getChildrens().begin(),
+                          backNode->getChildrens().end());
 
         // transform the current node
         ASSERT(backNode->parent() != 0);

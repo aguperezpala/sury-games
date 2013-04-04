@@ -17,17 +17,23 @@ namespace math {
 
 // Aligned box2D
 //
-template<typename _T>
+template<typename _T = float>
 class AABB {
 public:
     Vector2<_T> tl;
     Vector2<_T> br;
 
     AABB(){};
-    AABB(const Vector2<_T> &topLeft, const Vector2<_T> &bottomRight)
+    AABB(const Vector2<_T> &topLeft, const Vector2<_T> &bottomRight) :
+        tl(topLeft)
+    ,   br(bottomRight)
     {
-        tl = topLeft;
-        br = bottomRight;
+    }
+
+    AABB(_T tlx, _T tly, _T brx, _T bry) :
+        tl(Vector2<_T>(tlx, tly))
+    ,   br(Vector2<_T>(brx, bry))
+    {
     }
 
     // ge the center point (position)

@@ -37,16 +37,15 @@ Node::setSpacePartitionManager(s_p::SpacePartition *spaceManager)
 bool
 Node::checkCycles(Node *node) const
 {
-    ASSERT(false);
     // TODO: improve this
     debugOPTIMIZATION("Improve this algorithm\n");
 
-    std::set<Node *> markedChilds;
-    std::deque<Node *> nodes;
+    std::set<const Node *> markedChilds;
+    std::deque<const Node *> nodes;
     nodes.push_back(this);
     markedChilds.insert(this);
     while(!nodes.empty()){
-        Node *actualNode = nodes.front();
+        const Node *actualNode = nodes.front();
         nodes.pop_front();
         if (actualNode == node) {
             // cycle found
@@ -55,7 +54,7 @@ Node::checkCycles(Node *node) const
         // get the childs and put them in the queue
         const NodeVec &childrens = actualNode->getChildrens();
         for(size_t i = 0, size = childrens.size(); i < size; ++i){
-            Node *n = childrens[i];
+            const Node *n = childrens[i];
             if (node == n){
                 // cycle found
                 return true;

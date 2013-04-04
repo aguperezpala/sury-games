@@ -175,7 +175,7 @@ SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
     size_t afterBIndex = mMatrix.getIndex(tl.x, tl.y);
     const size_t afterEIndex = mMatrix.getIndex(br.x, br.y);
 
-    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEBIndex, obj);
+    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEIndex, obj);
 
 }
 
@@ -198,7 +198,7 @@ SpacePartition::updateObject(Object *obj, const math::AABBf &aabb)
     size_t afterBIndex = mMatrix.getIndex(aabb.tl.x, aabb.tl.y);
     const size_t afterEIndex = mMatrix.getIndex(aabb.br.x, aabb.br.y);
 
-    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEBIndex, obj);
+    updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEIndex, obj);
 }
 
 

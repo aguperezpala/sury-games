@@ -4,8 +4,10 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <ui/AnimatedSprite.h>
 
+#include <ui/AnimatedSprite.h>
+#include <scene/SceneManager.h>
+#include <scene/Node.h>
 #include <math/Matrix4.h>
 #include <math/AABB.h>
 
@@ -82,6 +84,16 @@ int main()
     sprite.setLoop(true);
     sprite.setPosition(0,0);
 
+    // create the scene manager
+    math::AABBf worldAABB(0.0f, 500.0f, 500.0f, 0.0f);
+    scene::SceneManager sceneManager(30, 30, worldAABB);
+    scene::Node &rootNode = sceneManager.rootNode();
+
+    scene::Node *newNode = rootNode.createChild();
+    scene::Entity *ent = new scene::Entity();
+    newNode->setEntity(ent);
+
+    newNode->setPosition(4,4);
 
     float lastTime = 0.f;
     // run the program as long as the window is open

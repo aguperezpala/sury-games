@@ -14,7 +14,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="0.1677885209" name="Default" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+				<configuration artifactName="fishes" buildProperties="" description="" id="0.1677885209" name="Default" parent="org.eclipse.cdt.build.core.prefbase.cfg">
 					<folderInfo id="0.1677885209." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.172762637" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.172762637.1267659973" name=""/>
@@ -25,6 +25,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/extlib/sfml2.0}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fishes/src}&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.2005994487" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -34,6 +35,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
 									<listOptionValue builtIn="false" value="/sury-fishes/src/common"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fishes/src}&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.542993609" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -42,6 +44,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/extlib/sfml2.0}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sury-fishes/src/core}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/fishes/src}&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1010090206" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -226,4 +229,5 @@
 			</profile>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

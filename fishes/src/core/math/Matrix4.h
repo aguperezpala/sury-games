@@ -52,8 +52,8 @@ public:
 
 
     // Matrix concatenation (combine) using '*'.
-    inline Matrix4 operator*( const Matrix4 &m2 ) const;
-    inline Matrix4 &operator*=(const Matrix4 &m2 );
+    inline Matrix4 operator*(const Matrix4 &m2) const;
+    inline Matrix4 &operator*=(const Matrix4 &m2);
 
     // Transform a point
     inline Vector2f transformPoint(const Vector2f& point) const;
@@ -224,7 +224,7 @@ Matrix4::combine(const Matrix4 &b)
 }
 
 
-inline Matrix4::Matrix4
+inline Matrix4
 Matrix4::operator*(const Matrix4 &m2) const
 {
     Matrix4 r(*this);
@@ -232,7 +232,7 @@ Matrix4::operator*(const Matrix4 &m2) const
 }
 
 
-inline Matrix4::Matrix4 &
+inline Matrix4 &
 Matrix4::operator*=(const Matrix4 &m2)
 {
     return combine(m2);

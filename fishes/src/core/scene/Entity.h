@@ -9,6 +9,7 @@
 #define ENTITY_H_
 
 #include <math/AABB.h>
+#include <common/debug/DebugUtil.h>
 
 namespace scene {
 
@@ -23,6 +24,15 @@ public:
      */
     inline void boundingBox(math::AABBf &aabb) const;
 };
+
+
+// Inline impl
+//
+inline void
+Entity::boundingBox(math::AABBf &aabb) const
+{
+    ASSERT(false);
+}
 
 }
 

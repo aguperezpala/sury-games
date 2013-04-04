@@ -32,7 +32,7 @@ SceneManager::SceneManager(const size_t numRows,
 
     // create the root node
     mRootNode = new Node();
-    mRootNode->attachSpaceObject();
+//    mRootNode->attachSpaceObject();
 
 
 }
@@ -40,7 +40,7 @@ SceneManager::SceneManager(const size_t numRows,
 ////////////////////////////////////////////////////////////////////////////////
 SceneManager::~SceneManager()
 {
-    delete Node;
+    delete mRootNode;
 }
 
 
@@ -64,9 +64,10 @@ SceneManager::update(void)
     for(std::set<Node *>::iterator it = dirtyRoots.begin(),
         eIt = dirtyRoots.end(); it != eIt; ++it){
         // the root node couldn't be the rootNode
-        ASSERT(*it != &mRootNode);
+        ASSERT(*it != mRootNode);
 
         // we have to update down the hierarchy of the root node
+        // TODO:
     }
 }
 

@@ -310,7 +310,7 @@ SpacePartition::segmentIntersection(const size_t a, const size_t b,
 
 inline void
 SpacePartition::updateObject(size_t beforeBIndex, const size_t beforeEIndex,
-                             size_t afterBIndex, const size_t afterEBIndex,
+                             size_t afterBIndex, const size_t afterEIndex,
                              Object *obj)
 {
     // calculate the intersection
