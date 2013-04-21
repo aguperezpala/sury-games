@@ -280,6 +280,14 @@ private:
      bool
      checkCycles(Node *node) const;
 
+     /**
+      * @brief Get all the children nodes of this one (recusrively get all the
+      *        childs).
+      * @param childNodes   The resulting vector of child nodes
+      */
+     void
+     getAllChilds(NodeVec &childNodes);
+
 private:
 
     struct Flags {
@@ -400,6 +408,17 @@ inline void
 Node::setVisible(bool show)
 {
     mFlags.visible = show;
+    if (!show) {
+        // detach it from the space partition
+        detachSpaceObject();
+    } else {
+        // if we have parent and is visible
+        if (mParent &&
+            mParent->isVisible() &&
+            sSpaceManager->exists(&mParent->mSpaceObject)) {
+            attachSpaceObject();
+        }
+    }
 }
 inline bool
 Node::isVisible(void) const

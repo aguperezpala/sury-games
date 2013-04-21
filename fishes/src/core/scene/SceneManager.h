@@ -51,6 +51,14 @@ public:
      */
     void update(void);
 
+    /**
+     * @brief Auxiliary function used to get all the nodes of the scene manager
+     * @param nodes     The list of all the nodes that the SceneManager is
+     *                  currently handling
+     */
+    inline const NodeVec &
+    getNodes(void) const;
+
 private:
     /**
      * @brief Find the last root of a node that is also dirty.
@@ -74,7 +82,7 @@ private:
     Node *mRootNode;
     NodeVec mDirtyNodes;
     s_p::SpacePartition mSpacePartition;
-    std::vector<Node *> mNodeQueue;
+    NodeVec mNodeQueue;
 };
 
 
@@ -123,6 +131,12 @@ SceneManager::updateHierarchy(Node *node)
         backNode->updateNodeTransformation(backNode->parent()->getWorldMat());
     }
 
+}
+
+inline const NodeVec &
+SceneManager::getNodes(void) const
+{
+    return mNodeQueue;
 }
 
 } /* namespace scene */

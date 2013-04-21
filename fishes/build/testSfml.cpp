@@ -4,6 +4,7 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/View.hpp>
 
 #include <ui/AnimatedSprite.h>
 #include <scene/SceneManager.h>
@@ -84,8 +85,19 @@ int main()
     sprite.setLoop(true);
     sprite.setPosition(0,0);
 
+    sprite.setPosition(100, 100);
+
+    // Testing view (camera)
+    sf::View view;
+    // Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
+    view.reset(sf::FloatRect(100, 100, 400, 200));
+    // Rotate it by 45 degrees
+    view.rotate(45);
+    // Set its target viewport to be half of the window
+    view.setViewport(sf::FloatRect(0.f, 0.f, 0.5f, 1.f));
+
     // create the scene manager
-    math::AABBf worldAABB(0.0f, 500.0f, 500.0f, 0.0f);
+    /*math::AABBf worldAABB(0.0f, 500.0f, 500.0f, 0.0f);
     scene::SceneManager sceneManager(30, 30, worldAABB);
     scene::Node &rootNode = sceneManager.rootNode();
 
@@ -94,6 +106,7 @@ int main()
     newNode->setEntity(ent);
 
     newNode->setPosition(4,4);
+    ent->animSprite = &sprite;*/
 
     float lastTime = 0.f;
     // run the program as long as the window is open
@@ -135,9 +148,26 @@ int main()
         const float timeFrame = nowTime - lastTime;
         lastTime = nowTime;
 
+        // update the logic of the scene manager and show the related nodes
+        /*sceneManager.update();
+        const scene::NodeVec &nodes = sceneManager.getNodes();
+        for (size_t i = 0, size = nodes.size(); i < size; ++i) {
+            const scene::Entity *ent = nodes[i]->getEntity();
+            if (!ent || ent->animSprite == 0) {
+                continue;
+            }
+            // draw this one
+            window.draw(*ent->animSprite);
+        }*/
 
+        view.rotate(0.001f);
         sprite.update(timeFrame);
+        // Apply it
+        window.setView(view);
+
         window.draw(sprite);
+        // Set the default view back
+         window.setView(window.getDefaultView());
 
         // window display all
         window.display();

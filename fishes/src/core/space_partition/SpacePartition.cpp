@@ -98,6 +98,8 @@ SpacePartition::build(const float ssX, const float ssY,
     mFactorX = static_cast<float>(cnX) / ssX;
     mFactorY = static_cast<float>(cnY) / ssY;
 
+    mMatrix.create(cnX, cnY);
+
     return true;
 }
 

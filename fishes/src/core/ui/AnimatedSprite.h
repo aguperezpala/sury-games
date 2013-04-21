@@ -118,6 +118,8 @@ private:
     std::size_t mAnimIndex;
 };
 
+// Typedef this as AnimatedSpritePtr
+typedef boost::shared_ptr<AnimatedSprite> AnimatedSpritePtr;
 
 // Inline implementations
 //

@@ -32,7 +32,7 @@ SceneManager::SceneManager(const size_t numRows,
 
     // create the root node
     mRootNode = new Node();
-//    mRootNode->attachSpaceObject();
+    mRootNode->attachSpaceObject();
 
 
 }

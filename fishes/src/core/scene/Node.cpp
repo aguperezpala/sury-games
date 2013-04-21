@@ -73,11 +73,58 @@ Node::checkCycles(Node *node) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void
+Node::getAllChilds(NodeVec &childNodes)
+{
+    // TODO: improve this
+    debugOPTIMIZATION("Improve this algorithm\n");
+
+    std::set<Node *> markedChilds;
+    std::deque<Node *> nodes;
+    nodes.push_back(this);
+    while(!nodes.empty()){
+        Node *actualNode = nodes.front();
+        nodes.pop_front();
+
+        // check if we already analyzed this node
+        if (markedChilds.find(actualNode) != markedChilds.end()) {
+            // yeah, we did
+            continue;
+        }
+
+        markedChilds.insert(actualNode);
+        childNodes.push_back(actualNode);
+
+        // get the childs and put them in the queue
+        const NodeVec &childrens = actualNode->getChildrens();
+        for(size_t i = 0, size = childrens.size(); i < size; ++i){
+            Node *n = childrens[i];
+            if (markedChilds.find(n) != markedChilds.end()) {
+                // already analyzed
+                continue;
+            }
+
+            // add the new node to the queue
+            nodes.push_back(n);
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-Node::Node()
+////////////////////////////////////////////////////////////////////////////////
+Node::Node() :
+    mParent(0)
+,   mEntity(0)
+,   mID(0)
 {
     ASSERT(sDirtyNodesCont != 0);
     ASSERT(sSpaceManager != 0);
+
+    math::AABBf aabb(0.f, 0.f, 1.f, 1.f);
+    mSpaceObject.setAABB(aabb);
+
+        // by default we want to show the node
+    mFlags.visible = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +151,13 @@ Node::addChild(Node *child)
     // add the node to be child of this one
     mChilds.push_back(child);
     child->mParent = this;
+
+    // if this is visible then we have to add the object
+    if (child->isVisible() &&
+        isVisible() &&
+        sSpaceManager->exists(&mSpaceObject)) {
+        child->attachSpaceObject();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,8 @@
 
 #include <math/AABB.h>
 #include <common/debug/DebugUtil.h>
+#include <ui/AnimatedSprite.h>
+#include <SFML/Graphics/Sprite.hpp>
 
 namespace scene {
 
@@ -17,6 +19,10 @@ class Entity {
 public:
     Entity();
     ~Entity();
+
+    // TEST: TODO: remove this
+    ui::AnimatedSprite* animSprite;
+
 
     /**
      * @brief Returns the bounding box of the entity
@@ -31,7 +37,14 @@ public:
 inline void
 Entity::boundingBox(math::AABBf &aabb) const
 {
-    ASSERT(false);
+    if (animSprite == 0) {
+        return;
+    }
+    sf::FloatRect fr = animSprite->getGlobalBounds();
+    aabb.tl.x = fr.left;
+    aabb.tl.y = fr.top;
+    aabb.br.x = fr.left + fr.width;
+    aabb.br.y = fr.top + fr.height;
 }
 
 }

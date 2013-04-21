@@ -9,7 +9,7 @@
 
 namespace scene {
 
-Entity::Entity() {
+Entity::Entity()  : animSprite(0) {
     // TODO Auto-generated constructor stub
 
 }
