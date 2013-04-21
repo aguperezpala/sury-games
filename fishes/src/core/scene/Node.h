@@ -208,7 +208,7 @@ private:
 
     // TODO: friend class here the SceneManager
     //
-    friend SceneManager;
+    friend class SceneManager;
 
     /**
      * @brief Function called by the SceneManager to update the world node

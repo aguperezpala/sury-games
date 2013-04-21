@@ -26,7 +26,7 @@ set(HDRS
  
 # Common sources
 set(SRCS
-	./testSfml.cpp
+	./testSfml2.cpp
 	
 )
 
@@ -48,8 +48,8 @@ include_directories(
 # include all the AutoGen.cmake
 include(${DEV_ROOT_PATH}/core/math/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/ui/AutoGen.cmake)
-include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)
-include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
+#include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)
+#include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
 
 # Set all the libraries here
 # Set the default flags to the build
