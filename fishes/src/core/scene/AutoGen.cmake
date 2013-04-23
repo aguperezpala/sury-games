@@ -8,12 +8,11 @@ set(SRCS
 	${SRCS}
 	${DEV_ROOT_PATH}/core/scene/Entity.cpp
 	${DEV_ROOT_PATH}/core/scene/SceneManager.cpp
-	${DEV_ROOT_PATH}/core/scene/Node.cpp
 )
 
 set(HDRS
 	${HDRS}
-	${DEV_ROOT_PATH}/core/scene/Node.h
+	${DEV_ROOT_PATH}/core/scene/LayerLevel.h
 	${DEV_ROOT_PATH}/core/scene/SceneManager.h
 	${DEV_ROOT_PATH}/core/scene/Entity.h
 )

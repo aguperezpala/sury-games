@@ -11,12 +11,17 @@
 #include <atomic>
 #include <memory>
 
+#include <boost/filesystem.hpp>
+
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <ui/AnimatedSprite.h>
 #include <math/Matrix4.h>
 #include <math/AABB.h>
+#include <core/resource_manager/ResourceManager.h>
+#include <common/Forwards.h>
+
 
 static std::atomic<unsigned int> mCounter;
 
@@ -97,6 +102,16 @@ int main()
 
     sprite.setPosition(100, 100);
 
+    resources::ResourceManager rm;
+    std::cout << "Reading resources: " << rm.readResourcesFromFolder("./mediaTest")
+        << std::endl;
+    sf::Sprite normalSprite;
+    TexturePtr tex;
+    ASSERT(rm.getResource("6x3.png", tex));
+    ASSERT(tex.get());
+    normalSprite.setTexture(*tex.get());
+
+
 
     float lastTime = 0.f;
     // run the program as long as the window is open
@@ -141,6 +156,7 @@ int main()
         sprite.update(timeFrame);
 
         window.draw(sprite);
+        window.draw(normalSprite);
 
         // window display all
         window.display();

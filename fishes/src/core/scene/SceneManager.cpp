@@ -9,6 +9,23 @@
 
 #include <set>
 
+#include <core/system/GlobalConfig.h>
+
+
+
+// Helper methods
+//
+namespace {
+template<typename T>
+inline void
+swapWithLast(std::vector<T> &vec, size_t index)
+{
+    const size_t size = vec.size();
+    vec[index] = vec[size-1];
+    vec.pop_back();
+}
+
+}
 
 
 namespace scene {
@@ -16,62 +33,59 @@ namespace scene {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SceneManager::SceneManager(const size_t numRows,
-                           const size_t numCols,
-                           const math::AABBf &world)
+SceneManager::SceneManager(sys::GlobalConfig& configWin) :
+    mRenderWindow(configWin.renderWindow())
 {
-    if (!mSpacePartition.build(world.getWidth(), world.getHeight(), numCols,
-        numRows)){
-        debugERROR("Error creating the world space partition\n");
-        ASSERT(false);
-    }
-
-    // Configure the nodes
-    Node::setSpacePartitionManager(&mSpacePartition);
-    Node::setDirtyNodesContainer(&mDirtyNodes);
-
-    // create the root node
-    mRootNode = new Node();
-    mRootNode->attachSpaceObject();
-
-
+    mCurrentScreen.tl.x = mCurrentScreen.tl.y = 0;
+    mCurrentScreen.br.x = configWin.windowWidth();
+    mCurrentScreen.br.y = configWin.windowHeight();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 SceneManager::~SceneManager()
 {
-    delete mRootNode;
 }
 
+void
+SceneManager::addEntity(const Entity* entity)
+{
+    ASSERT(entity);
+
+    if (hasEntity(entity)) {
+        debugWARNING("Trying to add two times the same entity\n");
+        return;
+    }
+    mEntities[entity->layerLevel()].push_back(entity);
+}
+
+void
+SceneManager::removeEntity(const Entity* entity)
+{
+    ASSERT(entity);
+    if (!hasEntity(entity)) {
+        debugWARNING("Trying to remove an inexistent entity\n");
+        return;
+    }
+    swapWithLast(mEntities[entity->layerLevel()], entity->mID);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SceneManager::update(void)
+SceneManager::drawEntities(void)
 {
-    // TODO: we can improve this using a boost::bit_set to see which nodes were
-    // already checked.
-    // We will use for now a set to get a unique set of root nodes that we
-    // have to update because of they dirtyness
-    std::set<Node *> dirtyRoots;
-    for(size_t i = 0, size = mDirtyNodes.size(); i < size; ++i){
-        dirtyRoots.insert(getHighestDirtyRoot(mDirtyNodes[i]));
-    }
-
-    // clear the nodes
-    mDirtyNodes.clear();
-
-    // update each of the nodes of each of the "root's" dirty nodes
-    for(std::set<Node *>::iterator it = dirtyRoots.begin(),
-        eIt = dirtyRoots.end(); it != eIt; ++it){
-        ASSERT(*it != mRootNode); // the root node couldn't be the rootNode
-
-        // we have to update down over the hierarchy of the root node.
-        // first get the parent transformation matrix
-        ASSERT((*it)->parent()); // we should have parent since we cannot be the root
-        const math::Matrix4 &parentMatrix =
-            ((*it)->parent()) ? (*it)->parent()->transformationMat() :
-                math::Matrix4::IDENTITY;
-        (*it)->updateNodeAndChildsTransforms(parentMatrix);
+    // we will draw the entities in the order we need
+    for (size_t i = 0; i < LayerLevel::SIZE; ++i) {
+        EntityVec& vec = mEntities[i];
+        for (size_t j = 0, size = vec.size(); j < size; ++j) {
+            // we will update the queue of the entities if we need here
+            mRenderWindow.draw(*vec[j]);
+            if (vec[j]->layerLevel() != static_cast<LayerLevel>(i)) {
+                // we need to update the queue of this entity it
+                removeEntity(vec[j]);
+                addEntity(vec[j]);
+                --j;    // we need to decrement this since we just remove an element
+            }
+        }
     }
 }
 

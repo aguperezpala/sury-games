@@ -48,8 +48,10 @@ include_directories(
 # include all the AutoGen.cmake
 include(${DEV_ROOT_PATH}/core/math/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/ui/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/core/resource_manager/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
 #include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)
-#include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
+
 
 # Set all the libraries here
 # Set the default flags to the build
@@ -57,7 +59,7 @@ link_directories(${DEV_ROOT_PATH}/extlib/sfml2.0/lib)
 add_definitions(-DDEBUG)
 add_definitions(-std=c++0x)  # C++11 standard
 add_definitions(-Wall)       # compile with all the warnings
-set(COMMON_LIBRARIES boost_signals boost_system 
+set(COMMON_LIBRARIES boost_signals boost_system boost_filesystem
                     #sfml 
                     sfml-graphics 
                     sfml-window 
