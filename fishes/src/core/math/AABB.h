@@ -40,13 +40,13 @@ public:
     inline void center(Vector2<_T> &center) const
     {
         center.x = (br.x - tl.x) * 0.5f;
-        center.y = (tl.y - br.y) * 0.5f;
+        center.y = (br.y - tl.y) * 0.5f;
     }
 
     // check if a point is inside of the box
     inline bool checkPointInside(const Vector2<_T> &p) const
     {
-        return p.x >= tl.x && p.x <= br.x && p.y >= br.y && p.y <= tl.y;
+        return p.x >= tl.x && p.x <= br.x && p.y >= tl.y && p.y <= br.y;
     }
 
     // translate the bounding box
@@ -59,27 +59,35 @@ public:
     inline void setSize(const _T x, const _T y)
     {
         // init at the (0,0) pos
-        tl.x = 0; tl.y = y;
-        br.x = x; br.y = 0;
+        tl.x = 0; tl.y = 0;
+        br.x = x; br.y = y;
     }
 
-    inline _T getHeight(void) const {return tl.y - br.y;}
+    inline _T getHeight(void) const {return br.y - tl.y;}
     inline _T getWidth(void) const {return br.x - tl.x;}
 
-    // set the AABB in position v as center
+    // set the AABB in position v
     inline void setPosition(const Vector2<_T> &v)
     {
-        _T aux = (br.x - tl.x) * 0.5f;
-        tl.x = v.x - aux; br.x = v.x + aux;
-        aux = (tl.y - br.y) * 0.5f;
-        tl.y = aux + v.y; br.y = v.y - aux;
+        const _T w = getWidth();
+        const _T h = getHeight();
+        tl = v;
+        br.x = tl.x + w;
+        br.y = tl.y + h;
     }
 
     // check the collision
     inline bool collide(const AABB &o) const
     {
-        return !((o.br.x < tl.x) || (o.tl.x > br.x) || (o.tl.y < br.y) ||
-                (tl.y < o.br.y));
+        return !((o.br.x < tl.x) || (o.tl.x > br.x) || (o.br.y < tl.y) ||
+                (br.y < o.tl.y));
+    }
+
+    // compare operators
+    //
+    inline bool operator==(const AABB<_T> &o) const
+    {
+        return tl == o.tl && br == o.br;
     }
 
     inline friend std::ostream& operator<<(std::ostream& o, const AABB<_T>& aabb)

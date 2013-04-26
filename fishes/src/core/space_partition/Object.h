@@ -9,6 +9,7 @@
 #define OBJECT_H_
 
 #include <climits>
+#include <cstdint>
 
 #include <math/Vector2.h>
 #include <math/AABB.h>
@@ -23,7 +24,7 @@ class SpacePartition;
 
 class Object {
 public:
-    static const uint32_t INVALID_INDEX = UINT_MAX;
+    static const std::uint32_t INVALID_INDEX = UINT_MAX;
 public:
     Object() :
         mGroupMask(~0u)
@@ -44,7 +45,7 @@ public:
      * @brief Position query function
      * @param pos   The position where the object is
      */
-    inline void position(math::Vector2f &pos) const;
+    inline void position(math::Vector2<UnitType> &pos) const;
 
     /**
      * @brief User defined functions.
@@ -58,14 +59,14 @@ public:
      * @brief Returns the AABB associated to this object
      * @returns the AABB of this object
      */
-    inline const math::AABBf &aabb(void) const;
-    inline math::AABBf &aabb(void);
+    inline const math::AABB<UnitType> &aabb(void) const;
+    inline math::AABB<UnitType> &aabb(void);
 
     /**
      * @brief Set the AABB associated to this object
      * @param aabb  the new AABB for this object
      */
-    inline void setAABB(const math::AABBf &aabb);
+    inline void setAABB(const math::AABB<UnitType> &aabb);
 
 
 private:
@@ -77,18 +78,18 @@ private:
      * @brief Position handling and query functions
      * @param pos   The position where we want to put the object
      */
-    inline void setPosition(const math::Vector2f &pos);
+    inline void setPosition(const math::Vector2<UnitType> &pos);
 
 
 private:
     // mask object (for collision groups)
-    uint32_t mGroupMask;
+    std::uint32_t mGroupMask;
     // the associated AABB
-    math::AABBf  mAABB;
+    math::AABB<UnitType>  mAABB;
     // user defined type
     void *mUserDefined;
     // the id of the object (index in manager)
-    uint32_t mID;
+    std::uint32_t mID;
     // value used to determine if the object was already checked in a run
     mutable unsigned short mCheckRun;
 };
@@ -99,12 +100,12 @@ private:
 //
 
 inline void
-Object::setPosition(const math::Vector2f &pos)
+Object::setPosition(const math::Vector2<UnitType> &pos)
 {
     mAABB.setPosition(pos);
 }
 inline void
-Object::position(math::Vector2f &pos) const
+Object::position(math::Vector2<UnitType> &pos) const
 {
     mAABB.center(pos);
 }
@@ -126,18 +127,18 @@ Object::setUserDefined(void *o)
     mUserDefined = o;
 }
 
-inline const math::AABBf &
+inline const math::AABB<UnitType> &
 Object::aabb(void) const
 {
     return mAABB;
 }
-inline math::AABBf &
+inline math::AABB<UnitType> &
 Object::aabb(void)
 {
     return mAABB;
 }
 inline void
-Object::setAABB(const math::AABBf &aabb)
+Object::setAABB(const math::AABB<UnitType> &aabb)
 {
     mAABB = aabb;
 }

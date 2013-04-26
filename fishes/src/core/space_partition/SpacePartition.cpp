@@ -63,10 +63,6 @@ SpacePartition::Matrix::removeAllObjects(void)
 SpacePartition::SpacePartition() :
         mFactorX(0)
 ,       mFactorY(0)
-,       mCellSizeX(0)
-,       mCellSizeY(0)
-,       mXBounds(0)
-,       mYBounds(0)
 ,       mNumCellX(0)
 ,       mNumCellY(0)
 ,       mRunNumber(0)
@@ -81,22 +77,18 @@ SpacePartition::~SpacePartition()
 
 ////////////////////////////////////////////////////////////////////////////////
 bool
-SpacePartition::build(const float ssX, const float ssY,
-                      const size_t cnX, const size_t cnY)
+SpacePartition::build(const math::AABB<UnitType> &world, UnitType cnX, UnitType cnY)
 {
+    // set the world size
+    mWorld = world;
+
     // num of cells
     mNumCellX = cnX;
     mNumCellY = cnY;
 
-    mCellSizeX = ssX / static_cast<float>(cnX);
-    mCellSizeY = ssY / static_cast<float>(cnY);
-
-    mXBounds = mNumCellX * mCellSizeX;
-    mYBounds = mNumCellY * mCellSizeY;
-
     // create the factors
-    mFactorX = static_cast<float>(cnX) / ssX;
-    mFactorY = static_cast<float>(cnY) / ssY;
+    mFactorX = static_cast<UnitType>(cnX) / world.getWidth();
+    mFactorY = static_cast<UnitType>(cnY) / world.getHeight();
 
     mMatrix.create(cnX, cnY);
 
@@ -151,6 +143,7 @@ void
 SpacePartition::removeAllObjects(void)
 {
     mMatrix.removeAllObjects();
+    mObjects.clear();
 }
 
 
@@ -160,22 +153,27 @@ SpacePartition::removeAllObjects(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
+SpacePartition::setObjectPosition(Object *obj, const math::Vector2<UnitType> &pos)
 {
     ASSERT(obj);
     ASSERT(exists(obj));
 
     // First get the actual indices for the object
-    const math::Vector2f &tl = obj->mAABB.tl;
-    const math::Vector2f &br = obj->mAABB.br;
-    size_t beforeBIndex = mMatrix.getIndex(tl.x, tl.y);
-    const size_t beforeEIndex = mMatrix.getIndex(br.x, br.y);
+    const math::Vector2<UnitType> &tl = obj->mAABB.tl;
+    const math::Vector2<UnitType> &br = obj->mAABB.br;
+    bool dummy;
+    size_t beforeBIndex = mMatrix.getIndex(getXPosition(tl.x, dummy),
+                                           getYPosition(tl.y, dummy));
+    const size_t beforeEIndex = mMatrix.getIndex(getXPosition(br.x, dummy),
+                                                 getYPosition(br.y, dummy));
 
     obj->setPosition(pos);
 
     // get the new positions now
-    size_t afterBIndex = mMatrix.getIndex(tl.x, tl.y);
-    const size_t afterEIndex = mMatrix.getIndex(br.x, br.y);
+    size_t afterBIndex = mMatrix.getIndex(getXPosition(tl.x,dummy),
+                                          getYPosition(tl.y, dummy));
+    const size_t afterEIndex = mMatrix.getIndex(getXPosition(br.x, dummy),
+                                                getYPosition(br.y, dummy));
 
     updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEIndex, obj);
 
@@ -183,22 +181,28 @@ SpacePartition::setObjectPosition(Object *obj, const math::Vector2f &pos)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::updateObject(Object *obj, const math::AABBf &aabb)
+SpacePartition::updateObject(Object *obj, const math::AABB<UnitType> &aabb)
 {
     ASSERT(obj);
     ASSERT(exists(obj));
 
     // First get the actual indices for the object
-    const math::Vector2f &tl = obj->mAABB.tl;
-    const math::Vector2f &br = obj->mAABB.br;
-    size_t beforeBIndex = mMatrix.getIndex(tl.x, tl.y);
-    const size_t beforeEIndex = mMatrix.getIndex(br.x, br.y);
+    const math::Vector2<UnitType> &tl = obj->mAABB.tl;
+    const math::Vector2<UnitType> &br = obj->mAABB.br;
+    bool dummy;
+    size_t beforeBIndex = mMatrix.getIndex(getXPosition(tl.x, dummy),
+                                           getYPosition(tl.y, dummy));
+    const size_t beforeEIndex = mMatrix.getIndex(getXPosition(br.x, dummy),
+                                                 getYPosition(br.y, dummy));
+
 
     obj->setAABB(aabb);
 
     // get the new positions now
-    size_t afterBIndex = mMatrix.getIndex(aabb.tl.x, aabb.tl.y);
-    const size_t afterEIndex = mMatrix.getIndex(aabb.br.x, aabb.br.y);
+    size_t afterBIndex = mMatrix.getIndex(getXPosition(tl.x,dummy),
+                                          getYPosition(tl.y, dummy));
+    const size_t afterEIndex = mMatrix.getIndex(getXPosition(br.x, dummy),
+                                                getYPosition(br.y, dummy));
 
     updateObject(beforeBIndex, beforeEIndex, afterBIndex, afterEIndex, obj);
 }
@@ -225,8 +229,8 @@ SpacePartition::getIntersections(const Object *obj, ConstObjectVec &objs)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::getObjectsQuery(const math::AABBf &aabb,
-                                uint32_t mask,
+SpacePartition::getObjectsQuery(const math::AABB<UnitType> &aabb,
+                                std::uint32_t mask,
                                 ConstObjectVec &result)
 {
     // new run number
@@ -242,26 +246,34 @@ SpacePartition::getObjectsQuery(const math::AABBf &aabb,
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::getObjectsQuery(const math::Vector2f &point,
+SpacePartition::getObjectsQuery(const math::Vector2<UnitType> &point,
                                 ConstObjectVec &result,
-                                uint32_t mask)
+                                std::uint32_t mask)
 {
     // new run number
     ++mRunNumber;
     result.clear();
 
-    TwoDimCell &cell = mMatrix.getCell(getXPosition(point.x),
-                                       getYPosition(point.y));
+    bool pointInside, aux;
+    const size_t px = getXPosition(point.x, pointInside);
+    const size_t py = getXPosition(point.y, aux);
+
+    if (!pointInside && !aux) {
+        // nothing to do
+        return;
+    }
+
+    TwoDimCell &cell = mMatrix.getCell(px, py);
     cell.getCollisionQuery(point, result, mRunNumber, mask);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-SpacePartition::getObjectsQuery(const math::Vector2f &p1,
-                                const math::Vector2f &p2,
+SpacePartition::getObjectsQuery(const math::Vector2<UnitType> &p1,
+                                const math::Vector2<UnitType> &p2,
                                 ConstObjectVec &result,
-                                uint32_t mask)
+                                std::uint32_t mask)
 {
     ASSERT(false);
     // TODO: here we have to get first the cells that collide with the line

@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <limits>
+#include <cinttypes>
 
 #include <math/AABB.h>
 #include <math/Vector2.h>
@@ -71,30 +72,30 @@ public:
     SpacePartition();
     ~SpacePartition();
 
-
     /**
      * @brief Builds the CollisionSpace
-     *        We will use the normal coordinates system, so the x grows
-     *        from left to right, and the y grows from down to up.
-     *        We also assume that the level start at the (0,0) position and
-     *        grows to the positive axis values
+     *        We will use the normal opengl coordinates system, this means that
+     *        the (0,0) is on the (top,left) and the (M,N) is on the
+     *        (bottom,right).
      *
-     * @param ssX   The space size X of the "world"
-     * @param ssY   The space size Y of the "world"
+     * @param world The world rectangle to detect collisions (screen size for example)
      * @param cnX   The number of cells used in X
      * @param cnY   The number of cells used in Y
      */
-    bool build(const float ssX, const float ssY, const size_t cnX, const size_t cnY);
+    bool
+    build(const math::AABB<UnitType> &world, UnitType cnX, UnitType cnY);
 
     /**
      * @brief Returns the level size and cells info
      */
-    inline float worldXSize(void) const;
-    inline float worldYSize(void) const;
-    inline float cellYSize(void) const;
-    inline float cellXSize(void) const;
-    inline size_t numCellsX(void) const;
-    inline size_t numCellsy(void) const;
+    inline
+    UnitType worldXSize(void) const;
+    inline
+    UnitType worldYSize(void) const;
+    inline
+    size_t numCellsX(void) const;
+    inline
+    size_t numCellsY(void) const;
 
 
     // Space Partition object handling functions
@@ -104,7 +105,8 @@ public:
      * @brief Add a object (the object wasn't added before)
      * @param obj   The object to be added
      */
-    void addObject(Object *obj);
+    void
+    addObject(Object *obj);
 
     /**
      * @brief Removes an object from the SpacePartition. This will stop the
@@ -112,18 +114,21 @@ public:
      *        Requires the object be in the SpacePartition
      * @param obj   The object to be removed
      */
-    void removeObject(const Object *obj);
+    void
+    removeObject(const Object *obj);
 
     /**
      * @brief Remove all the objects
      */
-    void removeAllObjects(void);
+    void
+    removeAllObjects(void);
 
     /**
      * @brief Check if an object exists or not in the SpacePartition
      * @param obj   The object we want to check if exists or not
      */
-    inline bool exists(const Object *obj) const;
+    inline bool
+    exists(const Object *obj) const;
 
 
     // Specific object handling functions
@@ -135,21 +140,24 @@ public:
      *              Partition)
      * @param t     The translation vector
      */
-    inline void translateObject(Object *obj, const math::Vector2f &t);
+    inline void
+    translateObject(Object *obj, const math::Vector2<UnitType> &t);
 
     /**
      * @brief Set the position of an specific object using a math::vector2
      * @param obj   The object to be re-positionated
      * @param pos   The position vector
      */
-    void setObjectPosition(Object *obj, const math::Vector2f &pos);
+    void
+    setObjectPosition(Object *obj, const math::Vector2<UnitType> &pos);
 
     /**
      * @brief Update the AABB of an object that was added before to this manager
      * @param obj   The object that we want to update the AABB
      * @param aabb  The new AABB we want to set to the object
      */
-    void updateObject(Object *obj, const math::AABBf &aabb);
+    void
+    updateObject(Object *obj, const math::AABB<UnitType> &aabb);
 
 
     // Space Partition querys
@@ -160,7 +168,8 @@ public:
      * @param obj       The object to be cheked against
      * @param result    The resulting vector to put the objects
      */
-    void getIntersections(const Object *obj, ConstObjectVec &objs);
+    void
+    getIntersections(const Object *obj, ConstObjectVec &objs);
 
     /**
      * @brief Get all the objects that are in a AABB region (AABB query).
@@ -168,20 +177,23 @@ public:
      * @param   mask    MaskGroup used to filter all the objects
      * @param   result  The Objects that are in the AABB
      */
-    void getObjectsQuery(const math::AABBf &aabb,
-                         uint32_t mask,
-                         ConstObjectVec &result);
+    void
+    getObjectsQuery(const math::AABB<UnitType> &aabb,
+                    std::uint32_t mask,
+                    ConstObjectVec &result);
 
     /**
      * @brief Get all the objects that intersect a certain point with a certain
      *        mask (Point query)
      * @param point     The point to check
-     * @param result    The result of the check
+     * @param result    The result of the check // we need to create 2 more rows and 2 more columns to get the objects that
+    // will be outside of the collision world
      * @param mask      The mask to be used
      */
-    void getObjectsQuery(const math::Vector2f &point,
-                         ConstObjectVec &result,
-                         uint32_t mask = ~0u);
+    void
+    getObjectsQuery(const math::Vector2<UnitType> &point,
+                    ConstObjectVec &result,
+                    std::uint32_t mask = ~0u);
 
     /**
      * @brief Get all the objects that intersect a certain line segment with a
@@ -191,10 +203,11 @@ public:
      * @param result    The result of the check
      * @param mask      The mask to be used
      */
-    void getObjectsQuery(const math::Vector2f &p1,
-                         const math::Vector2f &p2,
-                         ConstObjectVec &result,
-                         uint32_t mask = ~0u);
+    void
+    getObjectsQuery(const math::Vector2<UnitType> &p1,
+                    const math::Vector2<UnitType> &p2,
+                    ConstObjectVec &result,
+                    std::uint32_t mask = ~0u);
 
     /**
      * @brief Function used to check if a point is inside the Space Partition
@@ -202,7 +215,8 @@ public:
      * @return  True    if p is inside the Space Partition
      *          False   otherwise
      */
-    inline bool isPointInside(const math::Vector2f &p);
+    inline bool
+    isPointInside(const math::Vector2<UnitType> &p);
 
 
 private:
@@ -212,15 +226,15 @@ private:
     /**
      * Returns the corresponding values from a vector to the matrix
      */
-    inline size_t getXPosition(const float x) const;
-    inline size_t getYPosition(const float y) const;
+    inline size_t getXPosition(UnitType x, bool& inside) const;
+    inline size_t getYPosition(UnitType y, bool& inside) const;
 
     /**
      * Get the cells associated to a Object and put the result in buff
      */
     inline void getCellsFromObject(const Object *obj,
                                    std::vector<TwoDimCell*> &buff);
-    inline void getCellsFromAABB(const math::AABBf &aabb,
+    inline void getCellsFromAABB(const math::AABB<UnitType> &aabb,
                                  std::vector<TwoDimCell*> &buff);
 
     /**
@@ -240,12 +254,9 @@ private:
 
 
 private:
-    float mFactorX;
-    float mFactorY;
-    float mCellSizeX;
-    float mCellSizeY;
-    float mXBounds;
-    float mYBounds;
+    UnitType mFactorX;
+    UnitType mFactorY;
+    math::AABB<UnitType> mWorld;
     size_t mNumCellX;
     size_t mNumCellY;
     Matrix mMatrix;
@@ -263,17 +274,37 @@ private:
  * Returns the corresponding values from a vector to the matrix
  */
 inline size_t
-SpacePartition::getXPosition(const float x) const
+SpacePartition::getXPosition(UnitType x, bool& inside) const
 {
-    ASSERT(x >= 0.f);
+    ASSERT(x >= UnitType(0));
+
+    if (x < mWorld.tl.x) {
+        x = mWorld.tl.x;
+        inside = false;
+    } else if (x > mWorld.br.x) {
+        x = mWorld.br.x;
+        inside = false;
+    } else {
+        inside = true;
+    }
     const size_t r = static_cast<size_t>(x * mFactorX);
-    ASSERT(r < mNumCellX);
+    ASSERT(r >= 0);
     return (r >= mNumCellX) ? mNumCellX - 1 : r;
 }
 inline size_t
-SpacePartition::getYPosition(const float y) const
+SpacePartition::getYPosition(UnitType y, bool& inside) const
 {
-    ASSERT(y >= 0.f);
+    ASSERT(y >= UnitType(0));
+
+    if (y < mWorld.tl.y) {
+        y = mWorld.tl.y;
+        inside = false;
+    } else if (y > mWorld.br.y) {
+        y = mWorld.br.y;
+        inside = false;
+    } else {
+        inside = true;
+    }
     const size_t r = static_cast<size_t>(y * mFactorY);
     ASSERT(r < mNumCellY);
     return (r >= mNumCellY) ? mNumCellY-1 : r;
@@ -284,21 +315,33 @@ SpacePartition::getCellsFromObject(const Object *obj,
                                    std::vector<TwoDimCell*> &buff)
 {
     ASSERT(obj);
-    buff.clear();
-    const math::Vector2f &tl = obj->mAABB.tl;
-    const math::Vector2f &br = obj->mAABB.br;
-    mMatrix.getCell(getXPosition(tl.x), getYPosition(tl.y),
-                    getXPosition(br.x), getYPosition(br.y),
-                    buff);
+    getCellsFromAABB(obj->aabb(), buff);
 }
 inline void
-SpacePartition::getCellsFromAABB(const math::AABBf &aabb,
+SpacePartition::getCellsFromAABB(const math::AABB<UnitType> &aabb,
                                  std::vector<TwoDimCell*> &buff)
 {
     buff.clear();
-    mMatrix.getCell(getXPosition(aabb.tl.x), getYPosition(aabb.tl.y),
-                    getXPosition(aabb.br.x), getYPosition(aabb.br.y),
-                    buff);
+
+    // check if the aabb is completely outside or one
+    bool p1Inside, aux, p2Inside;
+    const size_t posX1 = getXPosition(aabb.tl.x, p1Inside);
+    const size_t posY1 = getYPosition(aabb.tl.y, aux);
+    p1Inside = p1Inside && aux;
+
+    const size_t posX2 = getXPosition(aabb.br.x, p2Inside);
+    const size_t posY2 = getYPosition(aabb.br.y, aux);
+    p2Inside = p2Inside && aux;
+
+    if (!p1Inside && !p2Inside) {
+        // nothing to do! the aabb is completely outside
+        ASSERT(mWorld.collide(aabb) == false); // ensure there is not one inside other
+        return;
+    }
+
+    // if we are here, this means we can get the cells using the better
+    // approximation of the positions (that are inside the cells) safely
+    mMatrix.getCell(posX1, posY1, posX2, posY2, buff);
 }
 
 inline bool
@@ -313,6 +356,8 @@ SpacePartition::updateObject(size_t beforeBIndex, const size_t beforeEIndex,
                              size_t afterBIndex, const size_t afterEIndex,
                              Object *obj)
 {
+    ASSERT(exists(obj));
+
     // calculate the intersection
     if (!segmentIntersection(beforeBIndex, beforeEIndex,
             afterBIndex, afterEIndex)){
@@ -353,25 +398,15 @@ SpacePartition::exists(const Object *obj) const
 }
 
 
-inline float
+inline UnitType
 SpacePartition::worldXSize(void) const
 {
-    return mCellSizeX * mNumCellX;
+    return mWorld.getWidth();
 }
-inline float
+inline UnitType
 SpacePartition::worldYSize(void) const
 {
-    return mCellSizeY*mNumCellY;
-}
-inline float
-SpacePartition::cellYSize(void) const
-{
-    return mCellSizeY;
-}
-inline float
-SpacePartition::cellXSize(void) const
-{
-    return mCellSizeX;
+    return mWorld.getHeight();
 }
 inline size_t
 SpacePartition::numCellsX(void) const
@@ -379,28 +414,24 @@ SpacePartition::numCellsX(void) const
     return mNumCellX;
 }
 inline size_t
-SpacePartition::numCellsy(void) const
+SpacePartition::numCellsY(void) const
 {
     return mNumCellY;
 }
 inline void
-SpacePartition::translateObject(Object *obj, const math::Vector2f &t)
+SpacePartition::translateObject(Object *obj, const math::Vector2<UnitType> &t)
 {
-    math::Vector2f pos;
-    obj->position(pos);
-    pos += t;
-    setObjectPosition(obj, pos);
+    ASSERT(obj);
+    ASSERT(exists(obj));
+    obj->aabb().translate(t);
+    updateObject(obj, obj->aabb());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 inline bool
-SpacePartition::isPointInside(const math::Vector2f &p)
+SpacePartition::isPointInside(const math::Vector2<UnitType> &p)
 {
-    if ((p.x < 0.0f || p.x > mXBounds) ||
-            (p.y < 0.0f || p.y > mYBounds)){
-        return false;
-    }
-    return true;
+    return mWorld.checkPointInside(p);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

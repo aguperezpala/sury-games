@@ -17,6 +17,8 @@ class Object;
 typedef std::vector<const Object *> ConstObjectVec;
 typedef std::vector<Object *> ObjectVec;
 
+typedef unsigned int UnitType;
+
 }
 
 

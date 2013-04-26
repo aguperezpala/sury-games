@@ -26,7 +26,8 @@ set(HDRS
  
 # Common sources
 set(SRCS
-	./testSfml2.cpp
+    # SpacePartition test
+	${DEV_ROOT_PATH}/core/space_partition/UnitTest/test.cpp
 	
 )
 
@@ -63,7 +64,10 @@ set(COMMON_LIBRARIES boost_signals boost_system boost_filesystem
                     #sfml 
                     sfml-graphics 
                     sfml-window 
-                    sfml-system)
+                    sfml-system
+                    
+                    # UnitTest++
+                    UnitTest++)
 
 
 add_executable(fishes WIN32 ${HDRS} ${SRCS}) 

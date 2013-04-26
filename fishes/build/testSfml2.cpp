@@ -21,6 +21,7 @@
 #include <math/AABB.h>
 #include <core/resource_manager/ResourceManager.h>
 #include <common/Forwards.h>
+#include <core/space_partition/SpacePartition.h>
 
 
 static std::atomic<unsigned int> mCounter;
@@ -69,6 +70,10 @@ matrixTest(void)
 
 int main()
 {
+    s_p::SpacePartition sp;
+    sp.build(math::AABB<unsigned int>(0,0, 100,100), 4, 4);
+
+
     matrixTest();
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
     sf::Clock clock;
