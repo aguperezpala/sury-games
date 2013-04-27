@@ -63,7 +63,6 @@ TEST(AddRemoveObject)
     spacePartition.addObject(&obj2);
     CHECK(spacePartition.exists(&obj2));
 
-    spacePartition.addObject(&obj);
     spacePartition.removeObject(&obj);
     CHECK(!spacePartition.exists(&obj));
     CHECK(spacePartition.exists(&obj2));
@@ -244,7 +243,7 @@ TEST(DifferentsCollisions)
     CHECK(result[0] == &obj);
 
     spacePartition.updateObject(&obj, AABB(10,10,20,20));
-    spacePartition.updateObject(&obj2, AABB(0,0,5,10));
+    spacePartition.updateObject(&obj2, AABB(0,0,10,11));
 
     spacePartition.getIntersections(&obj, result);
     CHECK_EQUAL(1, result.size());
@@ -256,6 +255,61 @@ TEST(DifferentsCollisions)
 
     PRINT_END(DifferentsCollisions);
 }
+
+TEST(MultiCollisionsMoving)
+{
+    PRINT_BEGIN(MultiCollisionsMoving);
+
+    spacePartition.removeAllObjects();
+
+    const size_t boxSize = 5;
+    static const size_t numObjs = 30;
+    AABB aabb(0, 0, boxSize, boxSize);
+    const Vec2 transVec(boxSize + 1, boxSize + 1);
+    s_p::Object obj[numObjs];
+    ResultVec result;
+
+    for (size_t i = 0; i < numObjs; ++i) {
+        obj[i].setAABB(aabb);
+        spacePartition.addObject(&(obj[i]));
+    }
+
+    // check that all the objects intersects
+    for (size_t i = 0; i < numObjs; ++i) {
+        spacePartition.getIntersections(&(obj[i]), result);
+        CHECK_EQUAL(numObjs-1, result.size());
+    }
+
+    // check that if we move each one of them then the intersection of all of them
+    // should be 0
+    for (size_t i = 1; i < numObjs; ++i) {
+        AABB trans = obj[i-1].aabb();
+        trans.translate(transVec);
+        spacePartition.updateObject(&(obj[i]), trans);
+    }
+    for (size_t i = 1; i < numObjs; ++i) {
+        spacePartition.getIntersections(&(obj[i]), result);
+        CHECK_EQUAL(0, result.size());
+    }
+
+    // move all of them again in the reverse order and we should get all of them
+    // beeing intersecting between them
+    for (size_t i = 1; i < numObjs; ++i) {
+        AABB trans = obj[i].aabb();
+        trans.translate(transVec*-i);
+        spacePartition.updateObject(&(obj[i]), trans);
+    }
+    for (size_t i = 0; i < numObjs; ++i) {
+        spacePartition.getIntersections(&(obj[i]), result);
+        CHECK_EQUAL(numObjs-1, result.size());
+    }
+
+    PRINT_END(MultiCollisionsMoving);
+}
+
+
+
+
 
 // Configure the Space partition
 //

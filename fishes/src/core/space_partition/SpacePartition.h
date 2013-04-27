@@ -389,8 +389,6 @@ SpacePartition::updateObject(size_t beforeBIndex, const size_t beforeEIndex,
 {
     ASSERT(exists(obj));
 
-    debugRED("SpacePartition::updateObject: %u, %u, %u, %u\n",
-        beforeBIndex, beforeEIndex, afterBIndex, afterEIndex);
     // calculate the intersection
     if (!segmentIntersection(beforeBIndex, beforeEIndex,
             afterBIndex, afterEIndex)){
@@ -513,7 +511,7 @@ SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
 
     // we do not reserve the size for the vector becase we assume that we
     // we will use always the same vector
-    for (; bIndex < eIndex; ++bIndex) {
+    for (; bIndex <= eIndex; ++bIndex) {
         result.push_back(&mCells[bIndex]);
     }
 }

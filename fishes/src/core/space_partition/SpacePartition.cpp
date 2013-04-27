@@ -89,7 +89,7 @@ SpacePartition::build(const math::AABB<UnitType> &world, size_t cnX, size_t cnY)
     mFactorX = static_cast<float>(cnX) / static_cast<float>(world.getWidth());
     mFactorY = static_cast<float>(cnY) / static_cast<float>(world.getHeight());
 
-    mMatrix.create(cnX, cnY);
+    mMatrix.create(cnY, cnX);
 
     return true;
 }
@@ -189,7 +189,6 @@ SpacePartition::updateObject(Object *obj, const math::AABB<UnitType> &aabb)
     if (!getIndices(aabb, afterBIndex, afterEIndex)) {
         // the destination position is outside of the mWorld, we need
         // to remove the object from the cells
-        debugRED("!!!!!!!!!!!!!!\n");
         getCellsFromObject(obj, mCellAuxBuffer);
         for(size_t i = 0, size = mCellAuxBuffer.size(); i < size; ++i){
             (mCellAuxBuffer[i])->removeObject(obj);
