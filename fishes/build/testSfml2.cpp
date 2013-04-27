@@ -16,56 +16,13 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#include <ui/AnimatedSprite.h>
+#include <core/utils/AnimatedSprite.h>
+#include <core/utils/TextureAtlas.h>
 #include <math/Matrix4.h>
 #include <math/AABB.h>
 #include <core/resource_manager/ResourceManager.h>
 #include <common/Forwards.h>
 #include <core/space_partition/SpacePartition.h>
-
-
-static std::atomic<unsigned int> mCounter;
-
-static void
-matrixTest(void)
-{
-    mCounter++;
-
-    math::Matrix4 m = math::Matrix4::IDENTITY;
-    math::AABBf aabb;
-    aabb.tl.x = 0;
-    aabb.tl.y = 10;
-    aabb.br.x = 10;
-    aabb.br.y = 0;
-
-    std::cout << m << std::endl;
-    std::cout << aabb << std::endl;
-
-    float angle  = -45 * 3.141592654f / 180.f;
-    float cosine = static_cast<float>(std::cos(angle));
-    float sine   = static_cast<float>(std::sin(angle));
-    float sxc    = 1 * cosine;
-    float syc    = 1 * cosine;
-    float sxs    = 1 * sine;
-    float sys    = 1 * sine;
-    float tx     = -5 * sxc - 5 * sys + 0;
-    float ty     =  5 * sxs - 5 * syc + 0;
-
-    math::Matrix4 m2( sxc, sys, tx,
-                            -sxs, syc, ty,
-                             0.f, 0.f, 1.f);
-    std::cout << "m2:\n" << m2 << std::endl;
-    math::AABBf aabb2(aabb);
-    m2.transformAABB(aabb2);
-    std::cout << "aabb2 transformed by m2\n" << aabb2 << std::endl;
-    m.transformAABB(aabb);
-    std::cout << "aabb transformed by m\n" << aabb << std::endl;
-
-    m2 *= m;
-    std::cout << "m2 after mult with m\n" << m2 << std::endl;
-
-}
-
 
 
 int main()
@@ -74,20 +31,27 @@ int main()
     sp.build(math::AABB<unsigned int>(0,0, 100,100), 4, 4);
 
 
-    matrixTest();
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
     sf::Clock clock;
 
-    ui::AnimatedSprite sprite;
+    utils::AnimatedSprite sprite;
+    resources::ResourceManager rm;
+    std::cout << "Reading resources: " << rm.readResourcesFromFolder("./mediaTest")
+      << std::endl;
 
-    if (!sprite.build("./mediaTest/6x3.png", 6, 3)){
-        std::cout << "Error building the sprite" << std::endl;
-        return -1;
-    }
+    TexturePtr tex;
+    ASSERT(rm.getResource("6x3.png", tex));
+    ASSERT(tex.get());
+    sprite.setTexture(tex);
+    utils::TextureAtlas texAtlas;
+    texAtlas.configure(tex, 6, 3);
+    sprite.setTextureAtlas(texAtlas);
+
+
 
     // configure the animations
-    ui::AnimatedSprite::AnimIndices anim;
-    std::vector<ui::AnimatedSprite::AnimIndices> animVec;
+    utils::AnimatedSprite::AnimIndices anim;
+    std::vector<utils::AnimatedSprite::AnimIndices> animVec;
     anim.begin = 0;
     anim.end = 5;
     anim.animTime = 4;
@@ -103,19 +67,7 @@ int main()
     sprite.createAnimTable(animVec);
     sprite.setAnim(0);
     sprite.setLoop(true);
-    sprite.setPosition(0,0);
-
-    sprite.setPosition(100, 100);
-
-    resources::ResourceManager rm;
-    std::cout << "Reading resources: " << rm.readResourcesFromFolder("./mediaTest")
-        << std::endl;
-    sf::Sprite normalSprite;
-    TexturePtr tex;
-    ASSERT(rm.getResource("6x3.png", tex));
-    ASSERT(tex.get());
-    normalSprite.setTexture(*tex.get());
-
+    sprite.sprite().setPosition(20, 20);
 
 
     float lastTime = 0.f;
@@ -160,8 +112,7 @@ int main()
 
         sprite.update(timeFrame);
 
-        window.draw(sprite);
-        window.draw(normalSprite);
+        window.draw(sprite.sprite());
 
         // window display all
         window.display();

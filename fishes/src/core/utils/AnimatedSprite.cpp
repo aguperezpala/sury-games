@@ -1,31 +1,30 @@
 /*
  * AnimatedSprite.cpp
  *
- *  Created on: Feb 12, 2013
+ *  Created on: Apr 27, 2013
  *      Author: agustin
  */
 
 #include "AnimatedSprite.h"
 
-#include <SFML/System/Vector2.hpp>
 
-#include <debug/DebugUtil.h>
-
-
-// auxiliar functions
+// auxiliary functions
+//
 namespace {
+
 // Get the index from a linear function (its a map of time to index)
 inline std::size_t
 getIndexFromTime(const float currTime, const float factor,
-                 const std::size_t begIndx, const std::size_t endIdnx)
+                 const unsigned int begIndx, const unsigned int endIdnx)
 {
     ASSERT(endIdnx >= begIndx);
-    return begIndx +
-            static_cast<std::size_t>((currTime * factor) * (endIdnx - begIndx + 1));
-}
+    return begIndx + static_cast<std::size_t>(
+        (currTime * factor) * (endIdnx - begIndx + 1));
 }
 
-namespace ui {
+}
+
+namespace utils {
 
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -34,8 +33,9 @@ AnimatedSprite::checkAnimTable(const std::vector<AnimIndices> &animation) const
     // this function is ultra verbose just to print almost all the possible
     // errors at once
     bool valid = true;
-    const std::size_t numSprites = mNumColumns * mNumRows;
-    for(std::size_t i = 0, size = animation.size(); i < size; ++i){
+    const unsigned int numSprites = mTextureAtlas.numColumns() * mTextureAtlas.numRows();
+
+    for (std::size_t i = 0, size = animation.size(); i < size; ++i) {
         const AnimIndices &animI = animation[i];
         if (animI.animTime < 0.f) {
             valid = false;
@@ -58,77 +58,22 @@ AnimatedSprite::checkAnimTable(const std::vector<AnimIndices> &animation) const
     return valid;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-void
-AnimatedSprite::configureRect(const std::size_t index)
-{
-    const std::size_t row = index / mNumColumns;
-    const std::size_t col = index - (mNumColumns * row);
-    ASSERT(row < mNumRows);
-    ASSERT(col < mNumColumns);
-
-    // put the rectangle over there
-    mRect.top = row * mRect.height;
-    mRect.left = col * mRect.width;
-
-    setTextureRect(mRect);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 ////////////////////////////////////////////////////////////////////////////////
 AnimatedSprite::AnimatedSprite() :
     mFlags(Flag::NONE)
 ,   mAccumTime(0.f)
 ,   mAnimTime(0.f)
 ,   mTimeFactor(0.f)
-,   mNumRows(0u)
-,   mNumColumns(0u)
 ,   mAnimIndex(0u)
 {
-
 }
 
-////////////////////////////////////////////////////////////////////////////////
 AnimatedSprite::~AnimatedSprite()
 {
-
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-bool
-AnimatedSprite::build(const std::string &textFName,
-                      std::size_t numColumns,
-                      std::size_t numRows)
-{
-    if (textFName.empty()) {
-        debugERROR("textFName is empty\n");
-        return false;
-    }
-    // check if we have to create a new texture
-    if (mTexture.get() == 0){
-        mTexture.reset(new sf::Texture());
-    }
-    if (!mTexture->loadFromFile(textFName)) {
-        debugERROR("Error loading texture: %s\n", textFName.c_str());
-        return false;
-    }
-
-    // set the texture to the sprite
-    setTexture(*mTexture.get());
-
-    // texture loaded ok, configure the rectangle size now
-    sf::Vector2u textSize = mTexture->getSize();
-    mRect.width = textSize.x / numColumns;
-    mRect.height = textSize.y / numRows;
-
-    mNumColumns = numColumns;
-    mNumRows = numRows;
-
-    return true;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -182,10 +127,10 @@ AnimatedSprite::update(float timeFrame)
     }
 
     // check which is the frame we have to show
-    const std::size_t frameIndex = getIndexFromTime(mAccumTime,
-                                                    mTimeFactor,
-                                                    mAnimations[mAnimIndex].begin,
-                                                    mAnimations[mAnimIndex].end);
+    const unsigned int frameIndex = getIndexFromTime(mAccumTime,
+                                                     mTimeFactor,
+                                                     mAnimations[mAnimIndex].begin,
+                                                     mAnimations[mAnimIndex].end);
     if (frameIndex != mFrameIndex){
         // configure the new frame
         mFrameIndex = frameIndex;
@@ -195,4 +140,4 @@ AnimatedSprite::update(float timeFrame)
 }
 
 
-} /* namespace ui */
+} /* namespace utils */

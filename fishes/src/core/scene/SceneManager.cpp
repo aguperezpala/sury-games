@@ -83,7 +83,9 @@ SceneManager::drawEntities(void)
                 // we need to update the queue of this entity it
                 removeEntity(vec[j]);
                 addEntity(vec[j]);
-                --j;    // we need to decrement this since we just remove an element
+                // the size of this vector and the current possition has changed
+                --j;
+                --size;
             }
         }
     }
