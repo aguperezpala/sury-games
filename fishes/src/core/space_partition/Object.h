@@ -30,7 +30,6 @@ public:
         mGroupMask(~0u)
     ,   mUserDefined(0)
     ,   mID(INVALID_INDEX)
-    ,   mCheckRun(0)
     {}
 
     /**
@@ -90,8 +89,6 @@ private:
     void *mUserDefined;
     // the id of the object (index in manager)
     std::uint32_t mID;
-    // value used to determine if the object was already checked in a run
-    mutable unsigned short mCheckRun;
 };
 
 

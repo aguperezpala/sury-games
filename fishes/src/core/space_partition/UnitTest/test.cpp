@@ -29,6 +29,8 @@ typedef math::Vector2<s_p::UnitType> Vec2;
 typedef s_p::ConstObjectVec ResultVec;
 
 
+#define PRINT_BEGIN(xx) debugGREEN("Starting test %s\n", #xx);
+#define PRINT_END(xx) debugGREEN("ENDING test %s\n", #xx);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///                             TESTS                                       ////
@@ -36,14 +38,20 @@ typedef s_p::ConstObjectVec ResultVec;
 
 TEST(CheckWorldSizeAndCellsSize)
 {
+    PRINT_BEGIN(CheckWorldSizeAndCellsSize);
+
     CHECK_EQUAL(WORLD_WIDTH, spacePartition.worldXSize());
     CHECK_EQUAL(WORLD_HEIGHT, spacePartition.worldYSize());
     CHECK_EQUAL(NUM_PART_X, spacePartition.numCellsX());
     CHECK_EQUAL(NUM_PART_Y, spacePartition.numCellsY());
+
+    PRINT_END(CheckWorldSizeAndCellsSize);
 }
 
 TEST(AddRemoveObject)
 {
+    PRINT_BEGIN(AddRemoveObject);
+
     s_p::Object obj, obj2;
     AABB aabb(0,0,10,10), aabb2(40,40,600,600);
     obj.setAABB(aabb);
@@ -69,11 +77,15 @@ TEST(AddRemoveObject)
 
     CHECK(!spacePartition.exists(&obj));
     CHECK(!spacePartition.exists(&obj2));
+
+    PRINT_END(AddRemoveObject);
 }
 
 
 TEST(ObjectTranslation)
 {
+    PRINT_BEGIN(ObjectTranslation);
+
     spacePartition.removeAllObjects();
 
     s_p::Object obj;
@@ -95,10 +107,14 @@ TEST(ObjectTranslation)
     aabb.translate(Vec2(4*WORLD_WIDTH, 4*WORLD_HEIGHT));
     spacePartition.translateObject(&obj, Vec2(4*WORLD_WIDTH, 4*WORLD_HEIGHT));
     CHECK(obj.aabb() == aabb);
+
+    PRINT_END(ObjectTranslation);
 }
 
 TEST(ObjectSetPosition)
 {
+    PRINT_BEGIN(ObjectSetPosition);
+
     spacePartition.removeAllObjects();
 
     s_p::Object obj;
@@ -120,10 +136,14 @@ TEST(ObjectSetPosition)
     aabb.setPosition(Vec2(4*WORLD_WIDTH, 4*WORLD_HEIGHT));
     spacePartition.setObjectPosition(&obj, Vec2(4*WORLD_WIDTH, 4*WORLD_HEIGHT));
     CHECK(obj.aabb() == aabb);
+
+    PRINT_END(ObjectSetPosition);
 }
 
 TEST(UpdateObjectPosition)
 {
+    PRINT_BEGIN(UpdateObjectPosition);
+
     spacePartition.removeAllObjects();
 
     s_p::Object obj;
@@ -139,10 +159,14 @@ TEST(UpdateObjectPosition)
 
     spacePartition.updateObject(&obj, aabb);
     CHECK(obj.aabb() == aabb);
+
+    PRINT_END(UpdateObjectPosition);
 }
 
 TEST(CheckSimpleColision)
 {
+    PRINT_BEGIN(CheckSimpleColision);
+
     spacePartition.removeAllObjects();
 
     s_p::Object obj,obj2;
@@ -168,10 +192,14 @@ TEST(CheckSimpleColision)
     spacePartition.getIntersections(&obj2, result);
     CHECK_EQUAL(1, result.size());
     CHECK(result[0] == &obj);
+
+    PRINT_END(CheckSimpleColision);
 }
 
 TEST(DifferentsCollisions)
 {
+    PRINT_BEGIN(DifferentsCollisions);
+
     spacePartition.removeAllObjects();
 
     s_p::Object obj,obj2;
@@ -226,6 +254,7 @@ TEST(DifferentsCollisions)
     CHECK_EQUAL(1, result.size());
     CHECK(result[0] == &obj);
 
+    PRINT_END(DifferentsCollisions);
 }
 
 // Configure the Space partition

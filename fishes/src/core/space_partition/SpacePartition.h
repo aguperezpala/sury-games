@@ -83,7 +83,7 @@ public:
      * @param cnY   The number of cells used in Y
      */
     bool
-    build(const math::AABB<UnitType> &world, UnitType cnX, UnitType cnY);
+    build(const math::AABB<UnitType> &world, size_t cnX, size_t cnY);
 
     /**
      * @brief Returns the level size and cells info
@@ -148,7 +148,7 @@ public:
      * @param obj   The object to be re-positionated
      * @param pos   The position vector
      */
-    void
+    inline void
     setObjectPosition(Object *obj, const math::Vector2<UnitType> &pos);
 
     /**
@@ -230,6 +230,16 @@ private:
     inline size_t getYPosition(UnitType y, bool& inside) const;
 
     /**
+     * Returns the begin index and end index from an AABB. If the AABB
+     * is completely outside of the CollisionWorld, then false is returned
+     * and the indices are incorrectly, if the AABB intersects with the
+     * CollisionWorld then true is returned and the indices are valid
+     */
+    inline bool getIndices(const math::AABB<UnitType> &aabb,
+                           size_t &beginIndex,
+                           size_t &endIndex);
+
+    /**
      * Get the cells associated to a Object and put the result in buff
      */
     inline void getCellsFromObject(const Object *obj,
@@ -254,15 +264,14 @@ private:
 
 
 private:
-    UnitType mFactorX;
-    UnitType mFactorY;
+    float mFactorX;
+    float mFactorY;
     math::AABB<UnitType> mWorld;
     size_t mNumCellX;
     size_t mNumCellY;
     Matrix mMatrix;
     std::vector<TwoDimCell*> mCellAuxBuffer;
     std::vector<Object *> mObjects;
-    unsigned short mRunNumber;
 };
 
 
@@ -282,13 +291,13 @@ SpacePartition::getXPosition(UnitType x, bool& inside) const
         x = mWorld.tl.x;
         inside = false;
     } else if (x > mWorld.br.x) {
-        x = mWorld.br.x;
+        x = mWorld.br.x - 1;
         inside = false;
     } else {
         inside = true;
     }
-    const size_t r = static_cast<size_t>(x * mFactorX);
-    ASSERT(r >= 0);
+    const size_t r = static_cast<size_t>(static_cast<float>(x) * mFactorX);
+    ASSERT(r < mNumCellX);
     return (r >= mNumCellX) ? mNumCellX - 1 : r;
 }
 inline size_t
@@ -300,14 +309,36 @@ SpacePartition::getYPosition(UnitType y, bool& inside) const
         y = mWorld.tl.y;
         inside = false;
     } else if (y > mWorld.br.y) {
-        y = mWorld.br.y;
+        y = mWorld.br.y - 1;
         inside = false;
     } else {
         inside = true;
     }
-    const size_t r = static_cast<size_t>(y * mFactorY);
+    const size_t r = static_cast<size_t>(static_cast<float>(y) * mFactorY);
     ASSERT(r < mNumCellY);
-    return (r >= mNumCellY) ? mNumCellY-1 : r;
+    return (r >= mNumCellY) ? mNumCellY - 1 : r;
+}
+
+inline bool
+SpacePartition::getIndices(const math::AABB<UnitType> &aabb,
+                           size_t &beginIndex,
+                           size_t &endIndex)
+{
+    bool inside1, aux, inside2;
+    const size_t x1 = getXPosition(aabb.tl.x, inside1);
+    const size_t y1 = getYPosition(aabb.tl.y, aux);
+    inside1 = inside1 && aux;
+
+    const size_t x2 = getXPosition(aabb.br.x, inside2);
+    const size_t y2 = getYPosition(aabb.br.y, aux);
+    inside2 = inside2 && aux;
+    if (!inside1 && !inside2) {
+        // we are completely outside
+        return false;
+    }
+    beginIndex = mMatrix.getIndex(x1, y1);
+    endIndex = mMatrix.getIndex(x2, y2);
+    return true;
 }
 
 inline void
@@ -358,6 +389,8 @@ SpacePartition::updateObject(size_t beforeBIndex, const size_t beforeEIndex,
 {
     ASSERT(exists(obj));
 
+    debugRED("SpacePartition::updateObject: %u, %u, %u, %u\n",
+        beforeBIndex, beforeEIndex, afterBIndex, afterEIndex);
     // calculate the intersection
     if (!segmentIntersection(beforeBIndex, beforeEIndex,
             afterBIndex, afterEIndex)){
@@ -423,8 +456,21 @@ SpacePartition::translateObject(Object *obj, const math::Vector2<UnitType> &t)
 {
     ASSERT(obj);
     ASSERT(exists(obj));
-    obj->aabb().translate(t);
-    updateObject(obj, obj->aabb());
+    math::AABB<UnitType> aabb = obj->aabb();
+    aabb.translate(t);
+    updateObject(obj, aabb);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+inline void
+SpacePartition::setObjectPosition(Object *obj, const math::Vector2<UnitType> &pos)
+{
+    ASSERT(obj);
+    ASSERT(exists(obj));
+
+    math::AABB<UnitType> aabb = obj->mAABB;
+    aabb.setPosition(pos);
+    updateObject(obj, aabb);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -467,7 +513,7 @@ SpacePartition::Matrix::getCell(const size_t bcol, const size_t brow,
 
     // we do not reserve the size for the vector becase we assume that we
     // we will use always the same vector
-    for(; bIndex < eIndex; ++bIndex) {
+    for (; bIndex < eIndex; ++bIndex) {
         result.push_back(&mCells[bIndex]);
     }
 }
