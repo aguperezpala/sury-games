@@ -162,6 +162,7 @@ public:
 
 // define the Vector2f
 typedef Vector2<float> Vector2f;
+typedef Vector2<unsigned int> Vector2ui;
 
 }
 

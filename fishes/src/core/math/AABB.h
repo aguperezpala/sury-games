@@ -100,6 +100,7 @@ public:
 
 // typedef the AABBf
 typedef AABB<float> AABBf;
+typedef AABB<unsigned int> AABBui;
 
 }
 
