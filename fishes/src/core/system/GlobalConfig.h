@@ -13,6 +13,13 @@
 
 #include <common/debug/DebugUtil.h>
 
+
+// Forward
+//
+namespace utils {
+class MouseCursor;
+}
+
 namespace sys {
 
 class GlobalConfig
@@ -26,19 +33,6 @@ public:
     //
 
     /**
-     * @brief Set/Get some useful global values
-     */
-    inline void
-    setWindowSize(const sf::Vector2u&);
-
-    inline const sf::Vector2u&
-    windowSize(void) const;
-    inline unsigned int
-    windowWidth(void) const;
-    inline unsigned int
-    windowHeight(void) const;
-
-    /**
      * @brief Render window get / set
      */
     inline const sf::RenderWindow&
@@ -49,19 +43,33 @@ public:
     inline void
     setRenderWindow(sf::RenderWindow &rw);
 
+    /**
+     * @brief Set/Get some useful global values
+     */
+    inline const sf::Vector2u&
+    windowSize(void) const;
+    inline unsigned int
+    windowWidth(void) const;
+    inline unsigned int
+    windowHeight(void) const;
+
+    /**
+     * @brief Set/Get MouseCursor instance
+     */
+    inline utils::MouseCursor&
+    mouseCursor(void);
+    inline void
+    setMouseCursor(utils::MouseCursor &mouseCursor);
+
 private:
     sf::Vector2u mWindowSize;
     sf::RenderWindow *mRenderWindow;
+    utils::MouseCursor *mMouseCursor;
 };
 
 
 // Inline impl
 //
-inline void
-GlobalConfig::setWindowSize(const sf::Vector2u& ws)
-{
-    mWindowSize = ws;
-}
 
 inline const sf::Vector2u&
 GlobalConfig::windowSize(void) const
@@ -95,6 +103,18 @@ inline void
 GlobalConfig::setRenderWindow(sf::RenderWindow &rw)
 {
     mRenderWindow = &rw;
+    mWindowSize = rw.getSize();
+}
+
+inline utils::MouseCursor&
+GlobalConfig::mouseCursor(void)
+{
+    return *mMouseCursor;
+}
+inline void
+GlobalConfig::setMouseCursor(utils::MouseCursor &mouseCursor)
+{
+    mMouseCursor = &mouseCursor;
 }
 
 } /* namespace system */

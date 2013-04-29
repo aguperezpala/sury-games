@@ -11,6 +11,8 @@
 #include <core/math/AABB.h>
 #include <core/math/Vector2.h>
 
+#include "UIManager.h"
+
 namespace ui {
 
 // Forward
@@ -20,7 +22,7 @@ class EventInfo;
 
 class Element {
 public:
-    Element();
+    inline Element(UIManager *manager);
     virtual ~Element();
 
     /**
@@ -31,6 +33,24 @@ public:
     virtual void
     newEvent(const EventInfo& event) = 0;
 
+    /**
+     * @brief Helper method to check if a point is inside of this element
+     */
+    inline bool
+    checkPointInside(const math::Vector2ui& point) const;
+
+    /**
+     * @brief Enable/disable the element (this will add / remove the element
+     *        from the UIManager)
+     */
+    inline void
+    activate(bool enable);
+
+    /**
+     * @brief Check if the element is activated or not
+     */
+    inline bool
+    isActivated(void) const;
 
     ////////////////////////////////////////////////////////////////////////////
     //                          Element Movement                              //
@@ -63,7 +83,13 @@ public:
 
 
 protected:
+    // we set the UImanager to be friend
+    friend class UIManager;
+
     math::AABBui mAABB;
+    UIManager *mManager;
+    bool mActivated;
+
 };
 
 
@@ -71,10 +97,55 @@ protected:
 
 // Inline impl
 //
+inline Element::Element(UIManager *manager) :
+    mManager(manager)
+,   mActivated(false)
+{
+    ASSERT(manager);
+}
+
+inline bool
+Element::checkPointInside(const math::Vector2ui& point) const
+{
+    return mAABB.checkPointInside(point);
+}
+
+inline bool
+Element::isActivated(void) const
+{
+    return mActivated;
+}
+
+inline void
+Element::activate(bool enable)
+{
+    ASSERT(mManager);
+    if (enable) {
+        if (mActivated) {
+            // do nothing
+            return;
+        }
+        mManager->addMenu(this); // this method will set mActivated = true
+    } else {
+        // check if is activated
+        if (!mActivated) {
+            // do nothing
+            return;
+        }
+        mManager->removeMenu(this); // this method will set mActivated = false
+    }
+}
+
 inline void
 Element::setAABB(const math::AABBui& aabb)
 {
-    mAABB = aabb;
+    if (isActivated()) {
+        activate(false);
+        mAABB = aabb;
+        activate(true);
+    } else {
+        mAABB = aabb;
+    }
 }
 
 inline const math::AABBui&
@@ -86,7 +157,13 @@ Element::aabb(void) const
 inline void
 Element::setPosition(const math::Vector2ui& pos)
 {
-    mAABB.setPosition(pos);
+    if (isActivated()) {
+        activate(false);
+        mAABB.setPosition(pos);
+        activate(true);
+    } else {
+        mAABB.setPosition(pos);
+    }
 }
 inline const math::Vector2ui&
 Element::position(void) const
@@ -97,7 +174,13 @@ Element::position(void) const
 inline void
 Element::translate(const math::Vector2ui& t)
 {
-    mAABB.translate(t);
+    if (isActivated()) {
+        activate(false);
+        mAABB.translate(t);
+        activate(true);
+    } else {
+        mAABB.translate(t);
+    }
 }
 
 }

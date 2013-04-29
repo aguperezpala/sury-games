@@ -13,6 +13,7 @@ set(SRCS
 set(HDRS
 	${HDRS}
 	${DEV_ROOT_PATH}/core/utils/TextureAtlas.h
+	${DEV_ROOT_PATH}/core/utils/MouseCursor.h
 	${DEV_ROOT_PATH}/core/utils/AnimatedSprite.h
 )
 

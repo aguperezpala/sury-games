@@ -26,7 +26,7 @@ set(HDRS
  
 # Common sources
 set(SRCS
-	./testSfml2.cpp
+	./testUI.cpp
 	
 )
 
@@ -48,6 +48,8 @@ include_directories(
 # include all the AutoGen.cmake
 include(${DEV_ROOT_PATH}/core/math/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/utils/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/core/ui/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/core/system/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/resource_manager/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)

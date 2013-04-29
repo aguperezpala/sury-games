@@ -9,10 +9,6 @@
 
 namespace ui {
 
-Element::Element() {
-    // TODO Auto-generated constructor stub
-
-}
 
 Element::~Element() {
     // TODO Auto-generated destructor stub
