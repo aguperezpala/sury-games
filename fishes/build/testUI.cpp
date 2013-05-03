@@ -29,38 +29,28 @@
 #include <core/system/GlobalConfig.h>
 #include <core/ui/UIManager.h>
 #include <core/ui/Element.h>
+#include <core/ui/Button.h>
 
 
-
-class TestElement : public ui::Element {
-public:
-    TestElement(ui::UIManager *m) : Element(m) {};
-
-    virtual void newEvent(const ui::EventInfo& event)
-    {
-        std::cout << "NewEvent: ";
-        switch (event.event) {
-        case ui::EventInfo::Event::None:
-            std::cout << "ui::EventInfo::Event::None";
-            break;
-        case ui::EventInfo::Event::MouseButton:
-            std::cout << "ui::EventInfo::Event::MouseButton";
-            break;
-        case ui::EventInfo::Event::MouseInside:
-            std::cout << "ui::EventInfo::Event::MouseInside";
-            break;
-        case ui::EventInfo::Event::MouseMoving:
-            std::cout << "ui::EventInfo::Event::MouseMoving";
-            break;
-        case ui::EventInfo::Event::MouseOutside:
-            std::cout << "ui::EventInfo::Event::MouseOutside";
-            break;
-        default:
-            ASSERT(false);
-        }
-        std::cout << std::endl;
+static ui::Button *
+createButton(const std::string& texName,
+             const math::AABBui& aabb,
+             ui::UIManager *manager,
+             resources::ResourceManager& rm)
+{
+    TexturePtr texture;
+    rm.getResource(texName, texture);
+    if (texture.get() == 0) {
+        return 0;
     }
-};
+    ui::Button* button = new ui::Button(manager);
+
+    button->setAABB(aabb);
+    button->configureButton(texture);
+
+
+    return button;
+}
 
 
 int main()
@@ -77,17 +67,18 @@ int main()
 
     // create the ui system and some elements
     ui::UIManager uiManager(gc);
-    TestElement elem1(&uiManager), elem2(&uiManager);
-    math::AABBui aabb(0,0,100,100);
-    elem1.setAABB(aabb);
-    aabb.translate(math::Vector2ui(200,200));
-    elem2.setAABB(aabb);
-    uiManager.addMenu(&elem1);
-    uiManager.addMenu(&elem2);
 
     resources::ResourceManager rm;
     std::cout << "Reading resources: " << rm.readResourcesFromFolder("./mediaTest")
       << std::endl;
+
+    // create the button
+    math::AABBui aabb(10,10,300,200);
+    ui::Button *button = createButton("button.png", aabb, &uiManager, rm);
+    if (button) {
+        uiManager.addMenu(button);
+    }
+
 
     TexturePtr tex;
     ASSERT(rm.getResource("6x3.png", tex));
@@ -102,6 +93,19 @@ int main()
 
     window.setMouseCursorVisible(false);
 
+    sf::Sprite removeMe;
+    TexturePtr tex2;
+    ASSERT(rm.getResource("button.png", tex2));
+    ASSERT(tex2.get());
+    removeMe.setTexture(*tex2.get());
+    removeMe.setPosition(300, 300);
+    const sf::Vector2u tex2Size = tex2->getSize();
+    sf::IntRect rectRemoveMe;
+    rectRemoveMe.width = tex2Size.x / 3;
+    rectRemoveMe.height = tex2Size.y;
+    rectRemoveMe.top = rectRemoveMe.left = 0;
+    removeMe.setTextureRect(rectRemoveMe);
+    removeMe.setScale(4,4);
 
     float lastTime = 0.f;
     // run the program as long as the window is open
@@ -127,6 +131,8 @@ int main()
         mouse.setMousePos(mousePos);
         window.draw(mouse);
         uiManager.update();
+
+        window.draw(removeMe);
 
         // window display all
         window.display();

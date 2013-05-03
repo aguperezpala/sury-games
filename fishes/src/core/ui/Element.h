@@ -13,6 +13,13 @@
 
 #include "UIManager.h"
 
+
+// Forward
+//
+namespace sf {
+class RenderWindow;
+}
+
 namespace ui {
 
 // Forward
@@ -32,6 +39,15 @@ public:
      */
     virtual void
     newEvent(const EventInfo& event) = 0;
+
+    /**
+     * @brief Virtual method to render this element. We will pass the RenderWindow
+     *        since some of this element could contain more than one sprite and
+     *        that's why we need to pass the render window
+     * @param renderWindow The render window where we will render this item
+     */
+    virtual void
+    render(sf::RenderWindow& renderWindow) const = 0;
 
     /**
      * @brief Helper method to check if a point is inside of this element
@@ -81,6 +97,15 @@ public:
     inline void
     translate(const math::Vector2ui& t);
 
+protected:
+
+    /**
+     * @brief This method will be called every time the element change (position.
+     *        size... basically, when the AABB change, this method is called).
+     *        Should be implemented by the inherited elements if needed
+     */
+    virtual void
+    elementChanged(void);
 
 protected:
     // we set the UImanager to be friend
@@ -90,6 +115,8 @@ protected:
     UIManager *mManager;
     bool mActivated;
 
+    // value used by the UIManager
+    size_t id;
 };
 
 
@@ -98,7 +125,8 @@ protected:
 // Inline impl
 //
 inline Element::Element(UIManager *manager) :
-    mManager(manager)
+    mAABB(0,0,1,1)
+,   mManager(manager)
 ,   mActivated(false)
 {
     ASSERT(manager);
@@ -146,6 +174,7 @@ Element::setAABB(const math::AABBui& aabb)
     } else {
         mAABB = aabb;
     }
+    elementChanged();
 }
 
 inline const math::AABBui&
@@ -164,6 +193,7 @@ Element::setPosition(const math::Vector2ui& pos)
     } else {
         mAABB.setPosition(pos);
     }
+    elementChanged();
 }
 inline const math::Vector2ui&
 Element::position(void) const
@@ -181,6 +211,7 @@ Element::translate(const math::Vector2ui& t)
     } else {
         mAABB.translate(t);
     }
+    elementChanged();
 }
 
 }

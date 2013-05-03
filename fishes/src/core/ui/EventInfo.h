@@ -9,6 +9,7 @@
 #define EVENTINFO_H_
 
 #include <cstring>
+#include <bitset>
 
 namespace ui {
 
@@ -26,25 +27,62 @@ struct EventInfo {
     } event;
 
     struct IOInfo {
-        IOInfo() { clear(); }
+        enum Mouse {
+            LeftButton = 0,
+            RightButton,
+            MiddleButton,
 
-        unsigned char LeftMousePressed : 1;
-        unsigned char RightMousePressed : 1;
-        unsigned char MiddleMousePressed : 1;
+            NumButtons,
+        };
+        IOInfo() { clear(); }
 
         // check for mouse info
         //
         bool someMouseButtonPressed(void) const
         {
-            return LeftMousePressed || RightMousePressed || MiddleMousePressed;
+            return mouseButtons.any();
+        }
+
+        // check if some button has released
+        //
+        bool someMouseButtonReleased(void) const
+        {
+            return mouseButtonsLast.any();
+        }
+
+        // Update the state of the buttons of the mouse
+        //
+        void updateState(Mouse button, bool pressed)
+        {
+            mouseButtonsLast[button] = mouseButtons[button];
+            mouseButtons.set(button, pressed);
+        }
+
+        // check for a particular button
+        //
+        bool checkButtonPressed(Mouse button) const
+        {
+            return mouseButtons[button];
+        }
+
+        // check if some button was released
+        //
+        bool checkButtonReleased(Mouse button) const
+        {
+            return !mouseButtons[button] && mouseButtonsLast[button];
         }
 
         // clear all
         //
         void clear(void)
         {
-            std::memset(this, 0, sizeof(IOInfo));
+            mouseButtons.reset();
+            mouseButtonsLast.reset();
         }
+
+    private:
+        std::bitset<NumButtons> mouseButtons;
+        std::bitset<NumButtons> mouseButtonsLast;
 
     } ioInfo;
 

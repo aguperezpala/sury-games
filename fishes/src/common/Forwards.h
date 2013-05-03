@@ -13,6 +13,7 @@
 
 namespace sf {
 class Texture;
+class Text;
 }
 
 // Forward declaration and typedefs
@@ -20,5 +21,6 @@ class Texture;
 
 // Resources typedefs
 typedef std::shared_ptr<sf::Texture> TexturePtr;
+typedef std::shared_ptr<sf::Text> TextPtr;
 
 #endif /* FORWARDS_H_ */

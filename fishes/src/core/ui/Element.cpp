@@ -14,4 +14,10 @@ Element::~Element() {
     // TODO Auto-generated destructor stub
 }
 
+void
+Element::elementChanged(void)
+{
+    debugWARNING("This element hasn't implemented the elementChanged() method\n");
+}
+
 }

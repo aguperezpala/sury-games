@@ -28,6 +28,10 @@ namespace ui {
 class Element;
 }
 
+namespace sf {
+class RenderWindow;
+}
+
 namespace ui {
 
 class UIManager {
@@ -45,6 +49,9 @@ public:
         mMouseCursor(gc.mouseCursor())
     ,   mCellSizeX(gc.windowWidth() / NUM_COLUMNS)
     ,   mCellSizeY(gc.windowHeight() / NUM_ROWS)
+    ,   mRenderWindow(gc.renderWindow())
+    ,   mWindowRect(math::Vector2ui(0,0),
+                    math::Vector2ui(gc.windowWidth(), gc.windowHeight()))
     {
             ASSERT(mCellSizeX > 0);
             ASSERT(mCellSizeY > 0);
@@ -63,10 +70,7 @@ public:
     hasMenu(const Element *menu);
 
     /**
-     * Update the menu
-     * @return  This function will return true if the mouse is over some object
-     *          or false if we are not over any object
-     * @note    This class use the GlobalObjects::mouse instance
+     * @brief Update the menu and draw all the UI elements
      */
     void
     update(void);
@@ -95,6 +99,12 @@ private:
     getVecsFromAABB(const math::AABBui& aabb,
                     std::vector<ElementVec*>& result);
 
+    /**
+     * @brief Render all the elements of this manager
+     */
+    void
+    renderAll(void) const;
+
 private:
     utils::MouseCursor &mMouseCursor;
     ElementVec mMatrix[NUM_ROWS * NUM_COLUMNS];
@@ -104,6 +114,9 @@ private:
     math::Vector2ui mLastMousePos;
     ElementVec mLastInside;
     EventInfo mEventInfo;
+    sf::RenderWindow& mRenderWindow;
+    ElementVec mElements;
+    const math::AABBui mWindowRect;
 };
 
 
@@ -148,8 +161,6 @@ UIManager::getVecsFromAABB(const math::AABBui& aabb,
         }
     }
 }
-
-
 
 }
 

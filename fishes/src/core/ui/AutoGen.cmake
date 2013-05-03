@@ -7,6 +7,7 @@ set(CP /core/ui)
 set(SRCS
 	${SRCS}
 	${DEV_ROOT_PATH}/core/ui/UIManager.cpp
+	${DEV_ROOT_PATH}/core/ui/Button.cpp
 	${DEV_ROOT_PATH}/core/ui/Element.cpp
 )
 
@@ -14,6 +15,7 @@ set(HDRS
 	${HDRS}
 	${DEV_ROOT_PATH}/core/ui/EventInfo.h
 	${DEV_ROOT_PATH}/core/ui/Element.h
+	${DEV_ROOT_PATH}/core/ui/Button.h
 	${DEV_ROOT_PATH}/core/ui/UIManager.h
 )
 

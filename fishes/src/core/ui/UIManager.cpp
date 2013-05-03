@@ -62,6 +62,20 @@ swapAndRemoveElement(std::vector<T> &vec, const size_t index)
 
 namespace ui {
 
+
+// Render all the elements
+//
+void
+UIManager::renderAll(void) const
+{
+    for (size_t i = 0, size = mElements.size(); i < size; ++i) {
+        Element* element = mElements[i];
+        if (element->isActivated() && mWindowRect.collide(element->aabb())) {
+            element->render(mRenderWindow);
+        }
+    }
+}
+
 /**
  * @brief Add/Remove/Check a new Element to be handled
  * @note We only can add an element if it is completely inside of the region
@@ -83,6 +97,8 @@ UIManager::addMenu(Element *menu)
     }
 
     menu->mActivated = true;
+    menu->id = mElements.size();
+    mElements.push_back(menu);
 }
 
 void
@@ -98,6 +114,8 @@ UIManager::removeMenu(Element *menu)
         swapAndRemoveElement(*(mResult[i]), getVecIndex(*(mResult[i]), menu));
     }
     menu->mActivated = false;
+
+    swapAndRemoveElement(mElements, menu->id);
 }
 
 bool
@@ -105,41 +123,36 @@ UIManager::hasMenu(const Element *menu)
 {
     ASSERT(menu);
 
-    // get all the cells that we have to put the menu
-    getVecsFromAABB(menu->aabb(), mResult);
-
-    if (mResult.empty()) {
-        return false;
-    }
-
-    // if we are here, then should be in all the cells.
-    const ElementVec& vec = *mResult.back();
-
-    return std::find(vec.begin(), vec.end(), menu) != vec.end();
+    return menu->id < mElements.size() && mElements[menu->id] == menu;
 }
 
 void
 UIManager::update(void)
 {
+    // first of all we render all the items, note that this approach will be
+    // rendered before all the logic of this frame updates
+    renderAll();
+
     // clear te event info to be sent
-    mEventInfo.clear();
+    mEventInfo.event = EventInfo::Event::None;
 
     // get the current position of the mouse
     const math::Vector2ui& currentMousePos = mMouseCursor.getPosition();
 
     // check for all the possible events
-    mEventInfo.ioInfo.MiddleMousePressed =
-        sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle);
-    mEventInfo.ioInfo.LeftMousePressed =
-        sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-    mEventInfo.ioInfo.RightMousePressed =
-        sf::Mouse::isButtonPressed(sf::Mouse::Button::Right);
+    mEventInfo.ioInfo.updateState(EventInfo::IOInfo::Mouse::MiddleButton,
+                                  sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle));
+    mEventInfo.ioInfo.updateState(EventInfo::IOInfo::Mouse::LeftButton,
+                                  sf::Mouse::isButtonPressed(sf::Mouse::Button::Left));
+    mEventInfo.ioInfo.updateState(EventInfo::IOInfo::Mouse::RightButton,
+                                  sf::Mouse::isButtonPressed(sf::Mouse::Button::Right));
 
     // if the mouse move then we do all the logic
     if(mLastMousePos == currentMousePos){
         // the mouse doesn't move, then we only update all the actual menues
         // for only check the mouse state
-        if (!mEventInfo.ioInfo.someMouseButtonPressed()) {
+        if (!mEventInfo.ioInfo.someMouseButtonPressed() &&
+            !mEventInfo.ioInfo.someMouseButtonReleased()) {
             // we don't want to do anything? for now we are only checking mouse
             return;
         }
