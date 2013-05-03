@@ -11,7 +11,7 @@
 #include <boost/signal.hpp>
 #include <boost/signals/slot.hpp>
 
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -148,7 +148,7 @@ private:
     configureTextPosition(void);
 
 private:
-    sf::Sprite mSprite;
+    sf::RectangleShape mSprite;
     TexturePtr mTexture;
     State mState;
     sf::IntRect mRect;

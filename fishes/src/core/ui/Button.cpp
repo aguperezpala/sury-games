@@ -14,20 +14,6 @@
 #include <core/math/Vector2.h>
 
 
-// Helper functions
-//
-namespace {
-
-// Calculate the proportional (factor) scale given the real size and the current
-// size, and returning the factor.
-inline float
-calculateFactor(float realSize, float currentSize)
-{
-    return currentSize / realSize;
-}
-
-}
-
 namespace ui {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,11 +40,8 @@ Button::elementChanged(void)
 
     mSprite.setPosition(pos.x, pos.y);
 
-    // calculate the scale
-    const sf::FloatRect texRect = mSprite.getGlobalBounds();
-    const float xScale = calculateFactor(texRect.width, width);
-    const float yScale = calculateFactor(texRect.height, height);
-    mSprite.setScale(xScale, yScale);
+    // calculate the size
+    mSprite.setSize(sf::Vector2f(width, height));
 }
 
 
@@ -126,7 +109,7 @@ Button::configureButton(const TexturePtr& texture, const sf::IntRect& rect)
 {
     ASSERT(texture.get());
     mTexture = texture;
-    mSprite.setTexture(*mTexture.get());
+    mSprite.setTexture(mTexture.get());
 
     // configure the rect
     mRect.height = rect.height;
