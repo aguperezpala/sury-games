@@ -8,7 +8,7 @@
 #ifndef ENTITY_H_
 #define ENTITY_H_
 
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 
 #include <math/AABB.h>
 #include <common/debug/DebugUtil.h>
@@ -52,13 +52,13 @@ public:
      *        the only thing we want to display on the screen as "GameObjects"
      *        and automatically convert to a drawable object for convenience.
      */
-    inline const sf::Sprite&
+    inline const sf::RectangleShape&
     sprite(void) const;
-    inline sf::Sprite&
+    inline sf::RectangleShape&
     sprite(void);
 
     inline void
-    setSprite(const sf::Sprite&);
+    setSprite(const sf::RectangleShape&);
     inline operator const sf::Drawable&(void) const;
 
     /**
@@ -71,7 +71,7 @@ public:
 
 private:
     LayerLevel mLayerLevel;
-    sf::Sprite mSprite;
+    sf::RectangleShape mSprite;
     bool mVisible;
 
     // id used by the sceneManager for a fast handle / render
@@ -108,19 +108,19 @@ Entity::setLayerLevel(LayerLevel ll)
     mLayerLevel = ll;
 }
 
-inline const sf::Sprite&
+inline const sf::RectangleShape&
 Entity::sprite(void) const
 {
     return mSprite;
 }
-inline sf::Sprite&
+inline sf::RectangleShape&
 Entity::sprite(void)
 {
     return mSprite;
 }
 
 inline void
-Entity::setSprite(const sf::Sprite& s)
+Entity::setSprite(const sf::RectangleShape& s)
 {
     mSprite = s;
 }

@@ -58,9 +58,8 @@ public:
 
     inline void setSize(const _T x, const _T y)
     {
-        // init at the (0,0) pos
-        tl.x = 0; tl.y = 0;
-        br.x = x; br.y = y;
+       br.x = tl.x + x;
+       br.y = tl.y + y;
     }
 
     inline _T getHeight(void) const {return br.y - tl.y;}
