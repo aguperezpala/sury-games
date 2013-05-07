@@ -90,6 +90,8 @@ TranslateEffect<FunctionType>::update(void)
     }
 }
 
+// We will do some typedefs here of the typical translate functions
+
 
 } /* namespace ui */
 #endif /* TRANSLATEEFFECT_H_ */

@@ -63,6 +63,22 @@ struct BezierQuadratic {
 ////////////////////////////////////////////////////////////////////////////////
 //
 
+// Constant function
+//
+class ConstantFun {
+public:
+    ConstantFun(float c) : mC(c) {}
+    ~ConstantFun() {}
+    float
+    operator()(float x)
+    {
+        return mC;
+    }
+private:
+    float mC;
+};
+
+
 // Linear function y(x) = a + b*x
 //
 class LinealFun {
