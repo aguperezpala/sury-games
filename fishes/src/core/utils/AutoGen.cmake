@@ -15,6 +15,8 @@ set(HDRS
 	${DEV_ROOT_PATH}/core/utils/TextureAtlas.h
 	${DEV_ROOT_PATH}/core/utils/MouseCursor.h
 	${DEV_ROOT_PATH}/core/utils/AnimatedSprite.h
+	${DEV_ROOT_PATH}/core/utils/UpdatableObject.h
+	${DEV_ROOT_PATH}/core/utils/UpdatableManager.h
 )
 
 set(ACTUAL_DIRS

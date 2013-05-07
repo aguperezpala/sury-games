@@ -203,9 +203,6 @@ Button::setState(State s)
     mRect.left = mRect.width * s;
     mSprite.setTextureRect(mRect);
     mState = s;
-
-    const sf::FloatRect t2 = mSprite.getGlobalBounds();
-    debugRED("NEW SIZE: %f, %f\n", t2.width, t2.height);
 }
 
 inline void

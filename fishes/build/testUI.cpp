@@ -30,11 +30,12 @@
 #include <core/ui/UIManager.h>
 #include <core/ui/Element.h>
 #include <core/ui/Button.h>
+#include <common/configuration/Config.h>
 
 
 static ui::Button *
 createButton(const std::string& texName,
-             const math::AABBui& aabb,
+             const math::AABBf& aabb,
              ui::UIManager *manager,
              resources::ResourceManager& rm)
 {
@@ -45,9 +46,10 @@ createButton(const std::string& texName,
     }
     ui::Button* button = new ui::Button(manager);
 
-    button->setAABB(aabb);
-    button->configureButton(texture);
+    common::Config& config = common::Config::instance();
 
+    button->setAABB(config.resize(aabb));
+    button->configureButton(texture);
 
     return button;
 }
@@ -61,6 +63,8 @@ int main()
     // configure the sys::GlobalConfig
     sys::GlobalConfig gc;
     gc.setRenderWindow(window);
+    common::Config& config = common::Config::instance();
+    config.setWindowSize(window.getSize().x, window.getSize().y);
 
     utils::MouseCursor mouse(gc);
     gc.setMouseCursor(mouse);
@@ -73,7 +77,7 @@ int main()
       << std::endl;
 
     // create the button
-    math::AABBui aabb(10,10,300,200);
+    math::AABBf aabb(0.5f, .5f , 1.0f, 1.0f);
     ui::Button *button = createButton("button.png", aabb, &uiManager, rm);
     if (button) {
         uiManager.addMenu(button);

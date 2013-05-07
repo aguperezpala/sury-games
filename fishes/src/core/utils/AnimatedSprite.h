@@ -111,9 +111,9 @@ public:
     /**
      * @brief Returns the associated sprite
      */
-    inline const sf::Sprite&
+    inline const sf::RectangleShape&
     sprite(void) const;
-    inline sf::Sprite&
+    inline sf::RectangleShape&
     sprite(void);
 
 private:
@@ -213,7 +213,7 @@ AnimatedSprite::setTexture(const TexturePtr &texture)
 {
     ASSERT(texture.get());
     mTexture = texture;
-    mEntity.sprite().setTexture(*texture.get());
+    mEntity.sprite().setTexture(texture.get());
 }
 
 inline void
@@ -227,12 +227,12 @@ inline AnimatedSprite::operator const scene::Entity&(void) const
     return mEntity;
 }
 
-inline const sf::Sprite&
+inline const sf::RectangleShape&
 AnimatedSprite::sprite(void) const
 {
     return mEntity.sprite();
 }
-inline sf::Sprite&
+inline sf::RectangleShape&
 AnimatedSprite::sprite(void)
 {
     return mEntity.sprite();

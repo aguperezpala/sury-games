@@ -53,6 +53,7 @@ include(${DEV_ROOT_PATH}/core/system/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/resource_manager/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/scene/AutoGen.cmake)
 include(${DEV_ROOT_PATH}/core/space_partition/AutoGen.cmake)
+include(${DEV_ROOT_PATH}/common/configuration/AutoGen.cmake)
 
 
 # Set all the libraries here

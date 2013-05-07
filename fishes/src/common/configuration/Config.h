@@ -13,6 +13,9 @@
 #include <core/math/AABB.h>
 #include <common/debug/DebugUtil.h>
 
+
+#define ASSERT_RANGE01(x) ASSERT(x >= 0.f);ASSERT(x <= 1.f);
+
 namespace common {
 
 class Config
@@ -49,21 +52,24 @@ public:
      * @param width     The value between [0,1] to be used as reference value
      * @param height    The value between [0,1] to be used as reference value
      */
-    inline void
-    resize(sf::FloatRect& rect) const;
-    inline void
-    resize(sf::IntRect& rect, float width, float height) const;
-    inline void
-    resize(math::AABBf& rect) const;
-    inline void
-    resize(math::AABBui& rect, float width, float height) const;
+    inline sf::IntRect
+    resize(const sf::FloatRect& rect) const;
+    inline math::AABBui
+    resize(const math::AABBf& rect) const;
 
-    template<typename T>
-    inline void
-    resizeWidth(T& value, float refValue) const;
-    template<typename T>
-    inline void
-    resizeHeight(T& value, float refValue) const;
+    // vector resize
+    //
+    inline sf::Vector2u
+    resize(const sf::Vector2f& v);
+    inline math::Vector2ui
+    resize(const math::Vector2f& v);
+
+    // simple value resize
+    //
+    inline unsigned int
+    resizeWidth(float refValue) const;
+    inline unsigned int
+    resizeHeight(float refValue) const;
 
 
 private:
@@ -83,57 +89,67 @@ private:
 
 // Inline impl
 //
-inline void
-Config::resize(sf::FloatRect& rect) const
-{
-    ASSERT(rect.width > 0.f && rect.width <= 1.0f);
-    ASSERT(rect.height > 0.f && rect.height <= 1.0f);
-    rect.width *=  mWinWidth;
-    rect.height *= mWinHeight;
-}
-inline void
-Config::resize(sf::IntRect& rect, float width, float height) const
-{
-    ASSERT(width > 0.f && width <= 1.0f);
-    ASSERT(height > 0.f && height <= 1.0f);
 
-    rect.width = width * mWinWidth;
-    rect.height = height * mWinHeight;
+inline void
+Config::setWindowSize(unsigned int width, unsigned int height)
+{
+    mWinWidth = width;
+    mWinHeight = height;
 }
 
-inline void
-Config::resize(math::AABBf& rect) const
+inline sf::IntRect
+Config::resize(const sf::FloatRect& rect) const
 {
-    const float width = rect.getWidth();
-    const float height = rect.getHeight();
-
-    ASSERT(width > 0.f && width <= 1.0f);
-    ASSERT(height > 0.f && height <= 1.0f);
-
-    rect.setSize(width * mWinWidth, height * mWinHeight);
+    ASSERT_RANGE01(rect.width);
+    ASSERT_RANGE01(rect.height);
+    ASSERT_RANGE01(rect.left);
+    ASSERT_RANGE01(rect.top);
+    return sf::IntRect(rect.left * mWinWidth, rect.top * mWinHeight,
+                       rect.width * mWinWidth, rect.height * mWinHeight);
 }
-inline void
-Config::resize(math::AABBui& rect, float width, float height) const
+inline math::AABBui
+Config::resize(const math::AABBf& rect) const
 {
-    ASSERT(width > 0.f && width <= 1.0f);
-    ASSERT(height > 0.f && height <= 1.0f);
+    ASSERT_RANGE01(rect.br.x);
+    ASSERT_RANGE01(rect.br.y);
+    ASSERT_RANGE01(rect.tl.x);
+    ASSERT_RANGE01(rect.tl.y);
 
-    rect.setSize(width * mWinWidth, height * mWinHeight);
+    return math::AABBui(rect.tl.x * mWinWidth, rect.tl.y * mWinHeight,
+                        rect.br.x * mWinWidth, rect.br.y * mWinHeight);
 }
 
-template<typename T>
-inline void
-Config::resizeWidth<T>(T& value, float refValue) const
+// vector resize
+//
+inline sf::Vector2u
+Config::resize(const sf::Vector2f& v)
 {
-    ASSERT(refValue > 0.f && refValue <= 1.0f);
-    value = mWinWidth * refValue;
+    ASSERT_RANGE01(v.x);
+    ASSERT_RANGE01(v.y);
+    return sf::Vector2u(v.x * mWinWidth, v.y * mWinHeight);
 }
-template<typename T>
-inline void
-Config::resizeHeight<T>(T& value, float refValue) const
+inline math::Vector2ui
+Config::resize(const math::Vector2f& v)
 {
-    ASSERT(refValue > 0.f && refValue <= 1.0f);
-    value = mWinHeight * refValue;
+    ASSERT_RANGE01(v.x);
+    ASSERT_RANGE01(v.y);
+
+    return math::Vector2ui(v.x * mWinWidth, v.y * mWinHeight);
+}
+
+// simple value resize
+//
+inline unsigned int
+Config::resizeWidth(float refValue) const
+{
+    ASSERT_RANGE01(refValue);
+    return refValue * mWinWidth;
+}
+inline unsigned int
+Config::resizeHeight(float refValue) const
+{
+    ASSERT_RANGE01(refValue);
+    return refValue * mWinHeight;
 }
 
 } /* namespace common */
