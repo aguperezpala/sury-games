@@ -129,6 +129,9 @@ UIManager::hasMenu(const Element *menu)
 void
 UIManager::update(void)
 {
+    // update the effects
+    mEffectMngr.update();
+
     // first of all we render all the items, note that this approach will be
     // rendered before all the logic of this frame updates
     renderAll();

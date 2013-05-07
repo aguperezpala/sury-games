@@ -59,25 +59,16 @@ struct BezierQuadratic {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//                  Single interface for functions                            //
+//                           Single functions                                 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-class SingleFunction {
-public:
-    virtual ~SingleFunction(){};
-    virtual float operator()(float) = 0;
-};
-
-// typedef of shared ptr
-//
-typedef std::shared_ptr<SingleFunction> SingleFunctionPtr;
 
 // Linear function y(x) = a + b*x
 //
-class LinealFun : public SingleFunction {
+class LinealFun {
 public:
     LinealFun(float a, float b) : mA(a), mB(b) {}
-    virtual ~LinealFun() {}
+    ~LinealFun() {}
     float
     operator()(float x)
     {
@@ -90,9 +81,9 @@ private:
 
 // Gauss approximation method
 //
-class GaussFun : public SingleFunction {
+class GaussFun {
 public:
-    virtual ~GaussFun() {}
+    ~GaussFun() {}
     float
     operator()(float x)
     {
@@ -103,7 +94,7 @@ public:
 
 // Bezier quadratic but only for the y value (domain: [0,1] and image: [0,1]
 //
-class BezierQuadLineal : public SingleFunction {
+class BezierQuadLineal {
 public:
     BezierQuadLineal(const math::Vector2f& aP1,
                      const math::Vector2f& aP2,
@@ -112,7 +103,7 @@ public:
          mBezier(aP1, aP2, aP3, aP4)
     {}
 
-    virtual ~BezierQuadLineal() {}
+    ~BezierQuadLineal() {}
     float
     operator()(float x)
     {
@@ -128,26 +119,21 @@ private:
 //          Vector functions will return a vector given a value X             //
 ////////////////////////////////////////////////////////////////////////////////
 //
-template<typename T>
-class VectorFunction {
-public:
-    virtual ~VectorFunction(){};
-    virtual math::Vector2<T> operator()(float) = 0;
-};
 
 // Translate vector method using bezier quadratic
 // As precondition we need that the function used maps:
 // 0 -> 0 and 1 -> 1
-class TranslateVec : public VectorFunction<float> {
+template<typename SingleFunctionType>
+class TranslateVec {
 public:
-    TranslateVec(const SingleFunctionPtr& fun) : mFun(fun)
+    TranslateVec(const SingleFunctionType& fun) : mFun(fun)
     {
         // ensure that the function we will use will give us the values we want
         // between [0,1]. And will map: 0 -> 0 and 1 -> 1
         ASSERT(fun(0.f) == 0.f);
         ASSERT(fun(1.f) == 1.f);
     }
-    virtual ~TranslateVec(){};
+    ~TranslateVec(){};
 
     // configure begin pos / end pos / time
     void
@@ -192,7 +178,7 @@ public:
     }
 
 private:
-    SingleFunctionPtr mFun;
+    SingleFunctionType mFun;
     math::Vector2f mBegPos;
     math::Vector2f mDirPos;
     float mTime;

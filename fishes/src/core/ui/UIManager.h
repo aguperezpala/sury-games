@@ -17,6 +17,7 @@
 #include <core/math/AABB.h>
 
 #include "EventInfo.h"
+#include "EffectsDefs.h"
 
 // Forward
 //
@@ -71,6 +72,7 @@ public:
 
     /**
      * @brief Update the menu and draw all the UI elements
+     *        Also update all the effects we have defined
      */
     void
     update(void);
@@ -105,6 +107,20 @@ private:
     void
     renderAll(void) const;
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                          Effect handling                              ///
+    ////////////////////////////////////////////////////////////////////////////
+    //
+
+    inline void
+    addEffect(Effect* e);
+    inline void
+    removeEffect(Effect* e);
+    inline void
+    hasEffect(Effect* e) const;
+
+
 private:
     utils::MouseCursor &mMouseCursor;
     ElementVec mMatrix[NUM_ROWS * NUM_COLUMNS];
@@ -117,6 +133,7 @@ private:
     sf::RenderWindow& mRenderWindow;
     ElementVec mElements;
     const math::AABBui mWindowRect;
+    EffectManager mEffectMngr;
 };
 
 
@@ -160,6 +177,25 @@ UIManager::getVecsFromAABB(const math::AABBui& aabb,
             result.push_back(&(mMatrix[getIndex(i, j)]));
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Effects
+//
+inline void
+UIManager::addEffect(Effect* e)
+{
+    mEffectMngr.add(e);
+}
+inline void
+UIManager::removeEffect(Effect* e)
+{
+    mEffectMngr.remove(e);
+}
+inline void
+UIManager::hasEffect(Effect* e) const
+{
+    mEffectMngr.exists(e);
 }
 
 }
